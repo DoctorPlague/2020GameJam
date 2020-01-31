@@ -1,7 +1,7 @@
 // Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
 
 #include "FarmerGameMode.h"
-#include "FarmerPlayer.h"
+#include "Player/FarmerPlayer.h"
 #include "UObject/ConstructorHelpers.h"
 
 AFarmerGameMode::AFarmerGameMode()
