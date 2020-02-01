@@ -39,4 +39,7 @@ protected:
 public:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	UTextBlock* DialogueBox;
+
+	UFUNCTION(BlueprintCallable)
+	void SetupDialogue(FString CowName, FString InputString);
 };

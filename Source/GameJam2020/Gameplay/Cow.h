@@ -17,7 +17,10 @@ public:
 	ACow();
 
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
-	class UWidgetComponent* HungryWidget;
+		class UWidgetComponent* HungryWidget;
+
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
+		class UCameraComponent* CowView;
 
 protected:
 	// Called when the game starts or when spawned
@@ -77,5 +80,9 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
 		float fFeedHungerIncrease = 100.0f;
+
+
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
+		FString CowName = "Bessy";
 
 };

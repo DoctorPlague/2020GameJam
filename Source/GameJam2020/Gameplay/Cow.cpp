@@ -7,8 +7,9 @@
 
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/WidgetComponent.h"
-#include"Camera/PlayerCameraManager.h"
+#include "Camera/PlayerCameraManager.h"
 #include "Kismet/GameplayStatics.h"
+#include "Camera/CameraComponent.h"
 
 #include "Engine/World.h"
 
@@ -21,6 +22,11 @@ ACow::ACow()
 	HungryWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("Hungry Widget"));
 	HungryWidget->SetupAttachment(GetRootComponent());
 	HungryWidget->RelativeLocation = FVector(90.0f, 0.0f, 100.0f);
+
+	CowView = CreateDefaultSubobject<UCameraComponent>(TEXT("Cow View"));
+	CowView->SetupAttachment(GetRootComponent());
+	CowView->RelativeLocation = FVector(225, 20, 0.0f);
+	CowView->RelativeRotation = FRotator(0, 0, -140.0f);
 }
 
 // Called when the game starts or when spawned
