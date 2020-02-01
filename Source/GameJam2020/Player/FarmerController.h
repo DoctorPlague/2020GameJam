@@ -29,7 +29,9 @@ protected:
 
 	virtual void OnPossess(APawn* InPawn) override;
 
-	void TempCompleteInteract();
+	void TempSuccessInteract();
+	void TempFailInteract();
+	void CompleteInteract();
 	void ResumePlayerInput();
 
 	void AddSuccessfulCow(class ACow* _Cow);

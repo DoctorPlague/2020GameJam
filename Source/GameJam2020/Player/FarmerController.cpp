@@ -45,6 +45,11 @@ void AFarmerController::InteractWithCow(class ACow* _Cow)
 	SetViewTargetWithBlend(ConversationCamera, 1.0f);
 
 	bIsInteracting = true;
+	bShowMouseCursor = true;
+	FInputModeGameAndUI InputMode;
+	InputMode.SetHideCursorDuringCapture(false);
+	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+	SetInputMode(InputMode);
 
 	CurrentCow->SetMovementEnabled(false);
 
@@ -63,11 +68,28 @@ void AFarmerController::OnPossess(APawn* InPawn)
 void AFarmerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
-	FInputActionBinding& InteractCompleteBind = InputComponent->BindAction("CompleteInteract", IE_Released, this, &AFarmerController::TempCompleteInteract);
+	FInputActionBinding& InteractCompleteBind = InputComponent->BindAction("CompleteInteract", IE_Released, this, &AFarmerController::TempSuccessInteract);
 	InteractCompleteBind.bConsumeInput = false;
+	InputComponent->BindAction("FailInteract", IE_Released, this, &AFarmerController::TempFailInteract);
 }
 
-void AFarmerController::TempCompleteInteract()
+void AFarmerController::TempSuccessInteract()
+{
+	if (CurrentCow)
+		AddSuccessfulCow(CurrentCow);
+
+	CompleteInteract();
+}
+
+void AFarmerController::TempFailInteract()
+{
+	if (CurrentCow)
+		CurrentCow->DecreaseRandHunger();
+
+	CompleteInteract();
+}
+
+void AFarmerController::CompleteInteract()
 {
 	if (!bIsInteracting)
 		return;
@@ -75,9 +97,9 @@ void AFarmerController::TempCompleteInteract()
 		SetViewTargetWithBlend(FarmerPlayerRef, fInteractReturnToPlayerTime);
 
 	bIsInteracting = false;
+	bShowMouseCursor = true;
+	SetInputMode(FInputModeGameOnly::FInputModeGameOnly());
 
-	if (CurrentCow)
-		AddSuccessfulCow(CurrentCow);
 
 	CurrentCow->SetMovementEnabled(true);
 	CurrentCow = nullptr;
@@ -85,6 +107,8 @@ void AFarmerController::TempCompleteInteract()
 	FTimerHandle ReturnControl;
 	GetWorldTimerManager().SetTimer(ReturnControl, this, &AFarmerController::ResumePlayerInput, fInteractReturnToPlayerTime);
 }
+
+
 
 void AFarmerController::ResumePlayerInput()
 {

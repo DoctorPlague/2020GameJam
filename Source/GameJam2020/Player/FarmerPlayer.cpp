@@ -91,6 +91,16 @@ void AFarmerPlayer::Interact()
 	if (!FarmerControllerRef)
 		return;
 
+	FHitResult InteractHit;
+	FVector Start = GetActorLocation();
+	FVector End = Start + GetActorForwardVector() * fInteractDistance;
+	if (GetWorld()->LineTraceSingleByChannel(InteractHit, Start, End, ECC_GameTraceChannel1))
+	{
+
+
+		return;
+	}
+
 	ACow* ClosestCow = GetClosestCow();
 	if (!ClosestCow)
 		return;
