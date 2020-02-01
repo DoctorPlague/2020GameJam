@@ -19,6 +19,7 @@ void AFarmerController::InteractWithCow(class ACow* _Cow)
 		return;
 	CurrentCow = _Cow;
 	FVector CowToPlayerDir = (FarmerPlayerRef->GetActorLocation() - _Cow->GetActorLocation()).GetSafeNormal();
+	CowToPlayerDir.Z = 0.0f;
 
 	FVector CowSideVector = _Cow->GetActorRightVector();
 	float Dot = FVector::DotProduct(CowToPlayerDir, _Cow->GetActorRightVector());
