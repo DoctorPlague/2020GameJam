@@ -19,6 +19,7 @@ void AFarmerController::InteractWithCow(class ACow* _Cow)
 		return;
 	CurrentCow = _Cow;
 	FVector CowToPlayerDir = (FarmerPlayerRef->GetActorLocation() - _Cow->GetActorLocation()).GetSafeNormal();
+	CowToPlayerDir.Z = 0.0f;
 
 	FVector CowSideVector = _Cow->GetActorRightVector();
 	float Dot = FVector::DotProduct(CowToPlayerDir, _Cow->GetActorRightVector());
@@ -45,6 +46,12 @@ void AFarmerController::InteractWithCow(class ACow* _Cow)
 	SetViewTargetWithBlend(ConversationCamera, 1.0f);
 
 	bIsInteracting = true;
+	bShowMouseCursor = true;
+	FInputModeUIOnly InputMode;
+	//FInputModeGameAndUI InputMode;
+	//InputMode.SetHideCursorDuringCapture(true);
+	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+	SetInputMode(InputMode);
 
 	CurrentCow->SetMovementEnabled(false);
 
@@ -60,14 +67,38 @@ void AFarmerController::OnPossess(APawn* InPawn)
 	}
 }
 
+void AFarmerController::GameLost(FString _Reason)
+{
+	if (FarmerPlayerRef)
+		FarmerPlayerRef->DisableInput(this);
+	BI_OnGameLost(_Reason);
+}
+
 void AFarmerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
-	FInputActionBinding& InteractCompleteBind = InputComponent->BindAction("CompleteInteract", IE_Released, this, &AFarmerController::TempCompleteInteract);
+	FInputActionBinding& InteractCompleteBind = InputComponent->BindAction("CompleteInteract", IE_Released, this, &AFarmerController::SuccededInteract);
 	InteractCompleteBind.bConsumeInput = false;
+	InputComponent->BindAction("FailInteract", IE_Released, this, &AFarmerController::FailedInteract);
 }
 
-void AFarmerController::TempCompleteInteract()
+void AFarmerController::SuccededInteract()
+{
+	if (CurrentCow)
+		AddSuccessfulCow(CurrentCow);
+
+	CompleteInteract();
+}
+
+void AFarmerController::FailedInteract()
+{
+	if (CurrentCow)
+		CurrentCow->DecreaseRandHunger();
+
+	CompleteInteract();
+}
+
+void AFarmerController::CompleteInteract()
 {
 	if (!bIsInteracting)
 		return;
@@ -75,16 +106,19 @@ void AFarmerController::TempCompleteInteract()
 		SetViewTargetWithBlend(FarmerPlayerRef, fInteractReturnToPlayerTime);
 
 	bIsInteracting = false;
+	bShowMouseCursor = false;
+	SetInputMode(FInputModeGameOnly::FInputModeGameOnly());
 
-	if (CurrentCow)
-		AddSuccessfulCow(CurrentCow);
 
 	CurrentCow->SetMovementEnabled(true);
 	CurrentCow = nullptr;
 
 	FTimerHandle ReturnControl;
 	GetWorldTimerManager().SetTimer(ReturnControl, this, &AFarmerController::ResumePlayerInput, fInteractReturnToPlayerTime);
+	BI_OnInteractComplete();
 }
+
+
 
 void AFarmerController::ResumePlayerInput()
 {

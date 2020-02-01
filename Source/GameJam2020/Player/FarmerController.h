@@ -23,13 +23,25 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void BI_OnAddSuccessfulCow(float _PercentageComplete);
 
+	UFUNCTION(BlueprintImplementableEvent)
+		void BI_OnInteractComplete();
+
+	UFUNCTION(BlueprintCallable)
+	void GameLost(FString _Reason);
+	UFUNCTION(BlueprintImplementableEvent)
+	void BI_OnGameLost(const FString& _Reason);
+
 protected:
 	// APawn interface
 	virtual void SetupInputComponent() override;
 
 	virtual void OnPossess(APawn* InPawn) override;
 
-	void TempCompleteInteract();
+	UFUNCTION(BlueprintCallable)
+	void SuccededInteract();
+	UFUNCTION(BlueprintCallable)
+	void FailedInteract();
+	void CompleteInteract();
 	void ResumePlayerInput();
 
 	void AddSuccessfulCow(class ACow* _Cow);

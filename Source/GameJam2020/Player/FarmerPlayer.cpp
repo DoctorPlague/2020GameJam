@@ -7,9 +7,12 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 
 #include "Gameplay/Cow.h"
 #include "FarmerController.h"
+
+#include "InteractInterface.h"
 
 //////////////////////////////////////////////////////////////////////////
 // AFarmerPlayer
@@ -88,8 +91,24 @@ void AFarmerPlayer::StopSprint()
 
 void AFarmerPlayer::Interact()
 {
+	FHitResult InteractHit;
+	FVector Start = GetActorLocation();
+	FVector End = Start + GetActorForwardVector() * fInteractDistance;
+	if (GetWorld()->LineTraceSingleByChannel(InteractHit, Start, End, ECC_GameTraceChannel1))
+	{
+		if (InteractHit.Actor->Implements<UInteractInterface>())
+		{
+			if (IInteractInterface::Execute_Interact(InteractHit.Actor.Get(), this))
+			{
+				return;
+			}
+		}
+
+	}
+
 	if (!FarmerControllerRef)
 		return;
+
 
 	ACow* ClosestCow = GetClosestCow();
 	if (!ClosestCow)
@@ -97,6 +116,9 @@ void AFarmerPlayer::Interact()
 
 	FarmerControllerRef->InteractWithCow(ClosestCow);
 	DisableInput(FarmerControllerRef);
+	FRotator NewRotation = GetActorRotation();
+	NewRotation.Yaw = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), ClosestCow->GetActorLocation()).Yaw;
+	SetActorRotation(NewRotation);
 }
 ACow* AFarmerPlayer::GetClosestCow()
 {
@@ -116,6 +138,20 @@ ACow* AFarmerPlayer::GetClosestCow()
 	}
 
 	return CurrentCowsInRange[iClosestIndex];
+}
+
+void AFarmerPlayer::PickedUpHay(AActor* Hay)
+{
+	CurrentHoldingHay = Hay;
+	BI_OnPickedUpHay();
+}
+
+void AFarmerPlayer::RemoveHay()
+{
+	if (CurrentHoldingHay)
+		CurrentHoldingHay->Destroy();
+
+	CurrentHoldingHay = nullptr;
 }
 
 void AFarmerPlayer::PossessedBy(AController* NewController)

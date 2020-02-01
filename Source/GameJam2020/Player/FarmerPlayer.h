@@ -24,6 +24,12 @@ public:
 	UFUNCTION(BlueprintPure)
 	class ACow* GetClosestCow();
 
+	void PickedUpHay(AActor* Hay);
+	UFUNCTION(BlueprintImplementableEvent)
+		void BI_OnPickedUpHay();
+
+	void RemoveHay();
+
 protected:
 
 
@@ -68,6 +74,8 @@ protected:
 		float fSprintSpeed = 600.0f;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		float fWalkSpeed = 300.0f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+		float fInteractDistance = 150.0f;
 
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
@@ -82,5 +90,8 @@ public:
 
 	UPROPERTY(BlueprintReadWrite)
 	TArray<ACow*> CurrentCowsInRange;
+
+	UPROPERTY(BlueprintReadWrite)
+	AActor* CurrentHoldingHay;
 };
 
