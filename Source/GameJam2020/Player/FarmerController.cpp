@@ -37,6 +37,8 @@ void AFarmerController::InteractWithCow(class ACow* _Cow)
 	bIsInteracting = true;
 
 	CurrentCow->SetMovementEnabled(false);
+
+	BI_OnInteractWithCow(_Cow);
 }
 
 void AFarmerController::OnPossess(APawn* InPawn)
@@ -51,7 +53,8 @@ void AFarmerController::OnPossess(APawn* InPawn)
 void AFarmerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
-	InputComponent->BindAction("CompleteInteract", IE_Released, this, &AFarmerController::TempCompleteInteract);
+	FInputActionBinding& InteractCompleteBind = InputComponent->BindAction("CompleteInteract", IE_Released, this, &AFarmerController::TempCompleteInteract);
+	InteractCompleteBind.bConsumeInput = false;
 }
 
 void AFarmerController::TempCompleteInteract()

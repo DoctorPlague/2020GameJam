@@ -17,6 +17,8 @@ class GAMEJAM2020_API AFarmerController : public APlayerController
 public:
 	void InteractWithCow(class ACow* _Cow);
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void BI_OnInteractWithCow(class ACow* _Cow);
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void BI_OnAddSuccessfulCow(float _PercentageComplete);
