@@ -3,6 +3,8 @@
 
 #include "Cow.h"
 
+#include "GameFramework/CharacterMovementComponent.h"
+
 // Sets default values
 ACow::ACow()
 {
@@ -16,6 +18,15 @@ void ACow::BeginPlay()
 {
 	Super::BeginPlay();
 	
+}
+
+void ACow::SetMovementEnabled(bool _bEnabled)
+{
+	bCanMove = _bEnabled;
+	EMovementMode NewMovement = EMovementMode::MOVE_None;
+	if (_bEnabled)
+		NewMovement = EMovementMode::MOVE_Walking;
+	GetCharacterMovement()->SetMovementMode(NewMovement);
 }
 
 // Called every frame

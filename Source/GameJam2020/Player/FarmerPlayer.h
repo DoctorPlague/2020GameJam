@@ -21,13 +21,8 @@ class AFarmerPlayer : public ACharacter
 public:
 	AFarmerPlayer();
 
-	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
-	float BaseTurnRate;
-
-	/** Base look up/down rate, in deg/sec. Other scaling may affect final rate. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
-	float BaseLookUpRate;
+	UFUNCTION(BlueprintPure)
+	class ACow* GetClosestCow();
 
 protected:
 
@@ -50,6 +45,12 @@ protected:
 	 */
 	void LookUpAtRate(float Rate);
 
+	void StartSprint();
+	void StopSprint();
+
+	void Interact();
+
+	virtual void PossessedBy(AController* NewController);
 
 protected:
 	// APawn interface
@@ -61,5 +62,25 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+		float fSprintSpeed = 600.0f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+		float fWalkSpeed = 300.0f;
+
+	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+		float BaseTurnRate;
+
+	/** Base look up/down rate, in deg/sec. Other scaling may affect final rate. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+		float BaseLookUpRate;
+
+	class AFarmerController* FarmerControllerRef;
+public:
+
+	UPROPERTY(BlueprintReadWrite)
+	TArray<ACow*> CurrentCowsInRange;
 };
 
