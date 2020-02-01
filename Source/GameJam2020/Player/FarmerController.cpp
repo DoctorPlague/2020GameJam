@@ -17,8 +17,10 @@
 void AFarmerController::InteractWithCow(class ACow* _Cow)
 {
 	CurrentCow = _Cow;
+	bCowView = true; // reverses so starts dialogue
 
-	ShowDialogue("Moo moo");
+	//ShowDialogue("Moo moo");
+	ChangeToDialogue();
 
 	bIsInteracting = true;
 	bShowMouseCursor = true;
@@ -76,24 +78,28 @@ void AFarmerController::ChangeViewToConversation()
 	FVector AimLoc = CurrentCow->GetActorLocation() + CowToPlayerDir * HalfLength;
 	ConversationCamera->SetActorRotation(UKismetMathLibrary::FindLookAtRotation(ConversationCamera->GetActorLocation(), AimLoc));
 
-	SetViewTargetWithBlend(ConversationCamera, 1.0f);
+	SetViewTargetWithBlend(ConversationCamera, fChangeToConverstationViewTime);
 
-	BI_OnConversationView();
+	BI_OnStartConversationView();
 }
 
 void AFarmerController::ChangeViewToCurrentCow()
 {
+	if (CurrentWidget)
+	{
+		CurrentWidget->RemoveFromParent();
+	}
+
 	if (CurrentCow)
-		SetViewTargetWithBlend(CurrentCow, 0.7f);
+		SetViewTargetWithBlend(CurrentCow, fChangeToCowViewTime);
 
 	bCowView = true;
 
-	BI_OnCowView();
+	BI_OnStartCowView();
 }
 
-void AFarmerController::ShowDialogue(FString _Message)
+void AFarmerController::ShowDialogue(const FString& _Message)
 {
-	ChangeViewToConversation();
 
 	if (!CurrentWidget && DialogueWidgetClass)
 	{
@@ -104,21 +110,21 @@ void AFarmerController::ShowDialogue(FString _Message)
 	if (!CurrentWidget)
 		return;
 
+	
 	FString CowName = "Bessy";
 	if (CurrentCow)
 		CowName = CurrentCow->CowName;
 	CurrentWidget->AddToViewport();
 	CurrentWidget->SetupDialogue(CowName, _Message);
+
+	BI_OnConversationView();
 }
 
 void AFarmerController::SpeechGame(EReactionType _ExpectedReaction)
 {
-	ChangeViewToCurrentCow();
+	//ChangeViewToCurrentCow();
 
-	if (CurrentWidget)
-	{
-		CurrentWidget->RemoveFromParent();
-	}
+	BI_OnCowView();
 }
 
 void AFarmerController::Continue()
@@ -127,16 +133,48 @@ void AFarmerController::Continue()
 		return;
 
 	if (bCowView)
-		ShowDialogue("MOOO moo");
+	{
+		ChangeToDialogue();
+	}
 	else
-		SpeechGame(EReactionType::E_AGRESSIVE);
+	{
+		ChangeToSpeechGame();
+	}
+}
+
+void AFarmerController::ChangeToDialogue()
+{
+	ChangeViewToConversation();
+
+	FTimerHandle ChangeView;
+	FTimerDelegate DialogueDelegate;
+	DialogueDelegate.BindUFunction(this, FName("ShowDialogue"), FString("MOOO moo"));
+	GetWorldTimerManager().SetTimer(ChangeView, DialogueDelegate, fChangeToConverstationViewTime, false);
+}
+
+void AFarmerController::ChangeToSpeechGame()
+{
+	ChangeViewToCurrentCow();
+
+	FTimerHandle ChangeView;
+	FTimerDelegate SpeechGameDelegate;
+	SpeechGameDelegate.BindUFunction(this, FName("SpeechGame"), EReactionType::E_AGRESSIVE);
+	GetWorldTimerManager().SetTimer(ChangeView, SpeechGameDelegate, fChangeToCowViewTime, false);
+}
+
+
+void AFarmerController::ShowEndScreen(FString _Status, FString _Reason)
+{
+	if (FarmerPlayerRef)
+		FarmerPlayerRef->DisableInput(this);
+
+	BI_OnShowEndScreen(_Status, _Reason);
 }
 
 void AFarmerController::GameLost(FString _Reason)
 {
-	if (FarmerPlayerRef)
-		FarmerPlayerRef->DisableInput(this);
-	BI_OnGameLost(_Reason);
+	ShowEndScreen("Game Lost", _Reason);
+	BI_OnGameLost();
 }
 
 void AFarmerController::SetupInputComponent()
@@ -151,10 +189,16 @@ void AFarmerController::SetupInputComponent()
 
 void AFarmerController::SuccededInteract()
 {
-	if (CurrentCow)
-		AddSuccessfulCow(CurrentCow);
+	StartCompleteInteract();
 
-	CompleteInteract();
+	if (CurrentCow)
+	{
+		//AddSuccessfulCow(CurrentCow);
+		FTimerHandle ReturnControl;
+		FTimerDelegate SuccessDelegate;
+		SuccessDelegate.BindUFunction(this, FName("AddSuccessfulCow"), CurrentCow);
+		GetWorldTimerManager().SetTimer(ReturnControl, SuccessDelegate, fInteractReturnToPlayerTime, false);
+	}
 }
 
 void AFarmerController::FailedInteract()
@@ -162,15 +206,29 @@ void AFarmerController::FailedInteract()
 	if (CurrentCow)
 		CurrentCow->DecreaseRandHunger();
 
-	CompleteInteract();
+	StartCompleteInteract();
+}
+
+void AFarmerController::StartCompleteInteract()
+{
+	if (FarmerPlayerRef)
+		SetViewTargetWithBlend(FarmerPlayerRef, fInteractReturnToPlayerTime);
+
+	FTimerHandle ReturnControl;
+	GetWorldTimerManager().SetTimer(ReturnControl, this, &AFarmerController::CompleteInteract, fInteractReturnToPlayerTime);
+
+	if (CurrentWidget)
+	{
+		CurrentWidget->RemoveFromParent();
+	}
+	
+	BI_OnStartInteractComplete();
 }
 
 void AFarmerController::CompleteInteract()
 {
 	if (!bIsInteracting)
 		return;
-	if (FarmerPlayerRef)
-		SetViewTargetWithBlend(FarmerPlayerRef, fInteractReturnToPlayerTime);
 
 	bIsInteracting = false;
 	bShowMouseCursor = false;
@@ -184,29 +242,26 @@ void AFarmerController::CompleteInteract()
 	CurrentCow->SetMovementEnabled(true);
 	CurrentCow = nullptr;
 
-	FTimerHandle ReturnControl;
-	GetWorldTimerManager().SetTimer(ReturnControl, this, &AFarmerController::ResumePlayerInput, fInteractReturnToPlayerTime);
+	if (FarmerPlayerRef)
+		FarmerPlayerRef->EnableInput(this);
 	BI_OnInteractComplete();
 }
 
 
 
-void AFarmerController::ResumePlayerInput()
-{
-	if (FarmerPlayerRef)
-		FarmerPlayerRef->EnableInput(this);
-}
 
 void AFarmerController::AddSuccessfulCow(ACow* _Cow)
 {
 	CowsComplete.Add(_Cow);
+	_Cow->CowComplete();
 
 	float PercentageComplete = float(CowsComplete.Num()) / float(iNumberOfCowsNeeded);
 
 	BI_OnAddSuccessfulCow(PercentageComplete);
 
-	if (PercentageComplete > 1.0f)
+	if (PercentageComplete >= 1.0f)
 	{
+		ShowEndScreen("Game Complete!", "All Cows are Happy!");
 		// GAME COMPLETE
 	}
 }

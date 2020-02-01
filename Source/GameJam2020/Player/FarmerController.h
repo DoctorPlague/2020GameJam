@@ -19,12 +19,18 @@ public:
 	void InteractWithCow(class ACow* _Cow);
 
 	UFUNCTION(BlueprintCallable)
-	void ShowDialogue(FString _Message);
+	void ShowDialogue(const FString& _Message);
 	UFUNCTION(BlueprintCallable)
 	void SpeechGame(EReactionType _ExpectedReaction);
 
 	void Continue();
+	void ChangeToDialogue();
+	void ChangeToSpeechGame();
 
+	UFUNCTION(BlueprintImplementableEvent)
+		void BI_OnStartConversationView();
+	UFUNCTION(BlueprintImplementableEvent)
+		void BI_OnStartCowView();
 	UFUNCTION(BlueprintImplementableEvent)
 		void BI_OnConversationView();
 	UFUNCTION(BlueprintImplementableEvent)
@@ -35,11 +41,18 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent)
 		void BI_OnInteractComplete();
+	UFUNCTION(BlueprintImplementableEvent)
+		void BI_OnStartInteractComplete();
+
+	UFUNCTION(BlueprintCallable)
+	void ShowEndScreen(FString _Status, FString _Reason);
+	UFUNCTION(BlueprintImplementableEvent)
+		void BI_OnShowEndScreen(const FString& _Status, const FString& _Reason);
 
 	UFUNCTION(BlueprintCallable)
 	void GameLost(FString _Reason);
 	UFUNCTION(BlueprintImplementableEvent)
-	void BI_OnGameLost(const FString& _Reason);
+	void BI_OnGameLost();
 
 protected:
 	// APawn interface
@@ -50,13 +63,15 @@ protected:
 	void ChangeViewToConversation();
 	void ChangeViewToCurrentCow();
 
+	void StartCompleteInteract();
+	void CompleteInteract();
+
 	UFUNCTION(BlueprintCallable)
 	void SuccededInteract();
 	UFUNCTION(BlueprintCallable)
 	void FailedInteract();
-	void CompleteInteract();
-	void ResumePlayerInput();
 
+	UFUNCTION()
 	void AddSuccessfulCow(class ACow* _Cow);
 public:
 	class AFarmerPlayer* FarmerPlayerRef;
@@ -80,6 +95,11 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly)
 		float fInteractReturnToPlayerTime = 0.5f;
+
+	UPROPERTY(EditDefaultsOnly)
+		float fChangeToCowViewTime = 0.7f;
+	UPROPERTY(EditDefaultsOnly)
+		float fChangeToConverstationViewTime = 1.0f;
 
 	UPROPERTY(EditDefaultsOnly)
 		TSubclassOf<class UDialogueWidget> DialogueWidgetClass;
