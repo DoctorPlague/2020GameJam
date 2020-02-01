@@ -34,7 +34,9 @@ protected:
 
 	virtual void OnPossess(APawn* InPawn) override;
 
+	UFUNCTION(BlueprintCallable)
 	void SuccededInteract();
+	UFUNCTION(BlueprintCallable)
 	void FailedInteract();
 	void CompleteInteract();
 	void ResumePlayerInput();
