@@ -35,6 +35,8 @@ void AFarmerController::InteractWithCow(class ACow* _Cow)
 	SetViewTargetWithBlend(ConversationCamera, 1.0f);
 
 	bIsInteracting = true;
+
+	CurrentCow->SetMovementEnabled(false);
 }
 
 void AFarmerController::OnPossess(APawn* InPawn)
@@ -64,6 +66,7 @@ void AFarmerController::TempCompleteInteract()
 	if (CurrentCow)
 		AddSuccessfulCow(CurrentCow);
 
+	CurrentCow->SetMovementEnabled(true);
 	CurrentCow = nullptr;
 
 	FTimerHandle ReturnControl;
