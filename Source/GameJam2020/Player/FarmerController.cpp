@@ -65,15 +65,22 @@ void AFarmerController::OnPossess(APawn* InPawn)
 	}
 }
 
+void AFarmerController::GameLost(FString _Reason)
+{
+	if (FarmerPlayerRef)
+		FarmerPlayerRef->DisableInput(this);
+	BI_OnGameLost(_Reason);
+}
+
 void AFarmerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
-	FInputActionBinding& InteractCompleteBind = InputComponent->BindAction("CompleteInteract", IE_Released, this, &AFarmerController::TempSuccessInteract);
+	FInputActionBinding& InteractCompleteBind = InputComponent->BindAction("CompleteInteract", IE_Released, this, &AFarmerController::SuccededInteract);
 	InteractCompleteBind.bConsumeInput = false;
-	InputComponent->BindAction("FailInteract", IE_Released, this, &AFarmerController::TempFailInteract);
+	InputComponent->BindAction("FailInteract", IE_Released, this, &AFarmerController::FailedInteract);
 }
 
-void AFarmerController::TempSuccessInteract()
+void AFarmerController::SuccededInteract()
 {
 	if (CurrentCow)
 		AddSuccessfulCow(CurrentCow);
@@ -81,7 +88,7 @@ void AFarmerController::TempSuccessInteract()
 	CompleteInteract();
 }
 
-void AFarmerController::TempFailInteract()
+void AFarmerController::FailedInteract()
 {
 	if (CurrentCow)
 		CurrentCow->DecreaseRandHunger();
