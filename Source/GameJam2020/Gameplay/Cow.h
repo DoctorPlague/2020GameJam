@@ -61,7 +61,7 @@ public:
 
 
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
-		float fOverallHungerRateSlow = 15.0f;
+		float fOverallHungerRateSlow = 20.0f;
 
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
 		float fCowHungerRateChangeMin = -5.0f;
@@ -76,6 +76,6 @@ public:
 		float fFailInteractLoseMax = 10.0f;
 
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
-		float fFeedHungerIncrease = 30.0f;
+		float fFeedHungerIncrease = 100.0f;
 
 };
