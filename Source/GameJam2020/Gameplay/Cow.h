@@ -17,7 +17,10 @@ public:
 	ACow();
 
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
-	class UWidgetComponent* HungryWidget;
+		class UWidgetComponent* HungryWidget;
+
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
+		class UCameraComponent* CowView;
 
 protected:
 	// Called when the game starts or when spawned
@@ -42,11 +45,18 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void IncreaseHunger();
 
+	void CowComplete();
+
 protected:
+
+	class UMaterialInstanceDynamic* CowDMI;
 
 public:
 	UPROPERTY(BlueprintReadWrite)
 		bool bCanMove = true;
+
+	UPROPERTY(BlueprintReadWrite)
+		bool bGivenMilk = false;
 
 	UPROPERTY(BlueprintReadWrite)
 		float fCowHungerRate = 1.0f;
@@ -61,7 +71,7 @@ public:
 
 
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
-		float fOverallHungerRateSlow = 15.0f;
+		float fOverallHungerRateSlow = 20.0f;
 
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
 		float fCowHungerRateChangeMin = -5.0f;
@@ -76,6 +86,10 @@ public:
 		float fFailInteractLoseMax = 10.0f;
 
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
-		float fFeedHungerIncrease = 30.0f;
+		float fFeedHungerIncrease = 100.0f;
+
+
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
+		FString CowName = "Bessy";
 
 };

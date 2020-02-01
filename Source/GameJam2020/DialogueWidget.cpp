@@ -76,6 +76,8 @@ void UDialogueWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 
 void UDialogueWidget::PopulateDialogueBox()
 {
+	if (!DialogueBox)
+		return;
 	FString CurrentString = DialogueBox->GetText().ToString();
 	if (CurrentString == FullDialogue)
 	{
@@ -96,5 +98,18 @@ void UDialogueWidget::PopulateDialogueBox()
 		}
 		
 	}
+}
+
+void UDialogueWidget::SetupDialogue(FString _CowName, FString _InputString)
+{
+	InputString = _InputString;
+	CowName = _CowName;
+	FullDialogue = CowName + ": " + InputString;
+	IsDialogueBoxPopulated = false;
+	TypingTimer = 0.0f;
+	DialogueCharIndex = 0;
+	if (DialogueBox)
+		DialogueBox->SetText(FText());
+	PopulateDialogueBox();
 }
 
