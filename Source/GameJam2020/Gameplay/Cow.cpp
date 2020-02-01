@@ -3,6 +3,8 @@
 
 #include "Cow.h"
 
+#include "Player/FarmerPlayer.h"
+
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/WidgetComponent.h"
 #include"Camera/PlayerCameraManager.h"
@@ -28,6 +30,18 @@ void ACow::BeginPlay()
 	
 }
 
+bool ACow::Interact_Implementation(AFarmerPlayer* InteractPlayer)
+{
+	if (InteractPlayer->CurrentHoldingHay)
+	{
+		InteractPlayer->RemoveHay();
+		IncreaseHunger();
+		return true;
+	}
+
+	return false;
+}
+
 void ACow::SetMovementEnabled(bool _bEnabled)
 {
 	bCanMove = _bEnabled;
@@ -43,6 +57,12 @@ void ACow::DecreaseRandHunger()
 
 	fCowFullness -= NewHungerLoss;
 	fCowFullness = FMath::Max(fCowFullness, 0.0f);
+}
+
+void ACow::IncreaseHunger()
+{
+	fCowFullness += fFeedHungerIncrease;
+	fCowFullness = FMath::Min(fCowFullness, 100.0f);	
 }
 
 // Called every frame

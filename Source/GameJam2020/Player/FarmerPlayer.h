@@ -24,6 +24,12 @@ public:
 	UFUNCTION(BlueprintPure)
 	class ACow* GetClosestCow();
 
+	void PickedUpHay(AActor* Hay);
+	UFUNCTION(BlueprintImplementableEvent)
+		void BI_OnPickedUpHay();
+
+	void RemoveHay();
+
 protected:
 
 
@@ -84,5 +90,8 @@ public:
 
 	UPROPERTY(BlueprintReadWrite)
 	TArray<ACow*> CurrentCowsInRange;
+
+	UPROPERTY(BlueprintReadWrite)
+	AActor* CurrentHoldingHay;
 };
 
