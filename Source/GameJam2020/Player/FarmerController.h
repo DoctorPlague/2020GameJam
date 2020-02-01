@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "EnumsStructs.h"
 #include "FarmerController.generated.h"
 
 /**
@@ -17,8 +18,17 @@ class GAMEJAM2020_API AFarmerController : public APlayerController
 public:
 	void InteractWithCow(class ACow* _Cow);
 
+	UFUNCTION(BlueprintCallable)
+	void ShowDialogue(FString _Message);
+	UFUNCTION(BlueprintCallable)
+	void SpeechGame(EReactionType _ExpectedReaction);
+
+	void Continue();
+
 	UFUNCTION(BlueprintImplementableEvent)
-	void BI_OnInteractWithCow(class ACow* _Cow);
+		void BI_OnConversationView();
+	UFUNCTION(BlueprintImplementableEvent)
+		void BI_OnCowView();
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void BI_OnAddSuccessfulCow(float _PercentageComplete);
@@ -36,6 +46,9 @@ protected:
 	virtual void SetupInputComponent() override;
 
 	virtual void OnPossess(APawn* InPawn) override;
+
+	void ChangeViewToConversation();
+	void ChangeViewToCurrentCow();
 
 	UFUNCTION(BlueprintCallable)
 	void SuccededInteract();
@@ -62,6 +75,14 @@ public:
 protected:
 	class ACow* CurrentCow;
 
+	UPROPERTY(BlueprintReadWrite)
+	bool bCowView = false;
+
 	UPROPERTY(EditDefaultsOnly)
 		float fInteractReturnToPlayerTime = 0.5f;
+
+	UPROPERTY(EditDefaultsOnly)
+		TSubclassOf<class UDialogueWidget> DialogueWidgetClass;
+
+	UDialogueWidget* CurrentWidget;
 };

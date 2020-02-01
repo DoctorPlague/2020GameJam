@@ -5,6 +5,7 @@
 
 #include "Gameplay/Cow.h"
 #include "Player/FarmerPlayer.h"
+#include "DialogueWidget.h"
 
 #include "Camera/CameraActor.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -15,47 +16,21 @@
 
 void AFarmerController::InteractWithCow(class ACow* _Cow)
 {
-	if (!FarmerPlayerRef)
-		return;
 	CurrentCow = _Cow;
-	FVector CowToPlayerDir = (FarmerPlayerRef->GetActorLocation() - _Cow->GetActorLocation()).GetSafeNormal();
-	CowToPlayerDir.Z = 0.0f;
 
-	FVector CowSideVector = _Cow->GetActorRightVector();
-	float Dot = FVector::DotProduct(CowToPlayerDir, _Cow->GetActorRightVector());
-	if (Dot > 0)
-	{
-		CowSideVector *= -1.0f;
-	}
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, "Dot product: " + FString::SanitizeFloat(Dot));
-
-	FVector NewCamDir = FMath::Lerp(CowSideVector, CowToPlayerDir, 0.6f);
-
-	FVector NewLocation = _Cow->GetActorLocation() + NewCamDir * 500.0f;
-	NewLocation.Z += 100.0f;
-
-	if (!ConversationCamera)
-		return;
-	ConversationCamera->SetActorLocation(NewLocation);
-
-	float HalfLength = (FarmerPlayerRef->GetActorLocation() - _Cow->GetActorLocation()).Size();
-	HalfLength /= 2.0f;
-	FVector AimLoc = _Cow->GetActorLocation() + CowToPlayerDir * HalfLength;
-	ConversationCamera->SetActorRotation(UKismetMathLibrary::FindLookAtRotation(ConversationCamera->GetActorLocation(), AimLoc));
-
-	SetViewTargetWithBlend(ConversationCamera, 1.0f);
+	ShowDialogue("Moo moo");
 
 	bIsInteracting = true;
 	bShowMouseCursor = true;
-	FInputModeUIOnly InputMode;
-	//FInputModeGameAndUI InputMode;
-	//InputMode.SetHideCursorDuringCapture(true);
+	//FInputModeUIOnly InputMode;
+	FInputModeGameAndUI InputMode;
+	InputMode.SetHideCursorDuringCapture(false);
 	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 	SetInputMode(InputMode);
 
-	CurrentCow->SetMovementEnabled(false);
+	if (CurrentCow)
+		CurrentCow->SetMovementEnabled(false);
 
-	BI_OnInteractWithCow(_Cow);
 }
 
 void AFarmerController::OnPossess(APawn* InPawn)
@@ -65,6 +40,96 @@ void AFarmerController::OnPossess(APawn* InPawn)
 	{
 		FarmerPlayerRef = FarmerPlayer;
 	}
+}
+
+void AFarmerController::ChangeViewToConversation()
+{
+	if (!FarmerPlayerRef)
+		return;
+	if (!ConversationCamera)
+		return;
+	if (!CurrentCow)
+		return;
+
+	bCowView = false;
+
+	FVector CowToPlayerDir = (FarmerPlayerRef->GetActorLocation() - CurrentCow->GetActorLocation()).GetSafeNormal();
+	CowToPlayerDir.Z = 0.0f;
+
+	FVector CowSideVector = CurrentCow->GetActorRightVector();
+	float Dot = FVector::DotProduct(CowToPlayerDir, CurrentCow->GetActorRightVector());
+	if (Dot > 0)
+	{
+		CowSideVector *= -1.0f;
+	}
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, "Dot product: " + FString::SanitizeFloat(Dot));
+
+	FVector NewCamDir = FMath::Lerp(CowSideVector, CowToPlayerDir, 0.6f);
+
+	FVector NewLocation = CurrentCow->GetActorLocation() + NewCamDir * 500.0f;
+	NewLocation.Z += 100.0f;
+
+	ConversationCamera->SetActorLocation(NewLocation);
+
+	float HalfLength = (FarmerPlayerRef->GetActorLocation() - CurrentCow->GetActorLocation()).Size();
+	HalfLength /= 2.0f;
+	FVector AimLoc = CurrentCow->GetActorLocation() + CowToPlayerDir * HalfLength;
+	ConversationCamera->SetActorRotation(UKismetMathLibrary::FindLookAtRotation(ConversationCamera->GetActorLocation(), AimLoc));
+
+	SetViewTargetWithBlend(ConversationCamera, 1.0f);
+
+	BI_OnConversationView();
+}
+
+void AFarmerController::ChangeViewToCurrentCow()
+{
+	if (CurrentCow)
+		SetViewTargetWithBlend(CurrentCow, 0.7f);
+
+	bCowView = true;
+
+	BI_OnCowView();
+}
+
+void AFarmerController::ShowDialogue(FString _Message)
+{
+	ChangeViewToConversation();
+
+	if (!CurrentWidget && DialogueWidgetClass)
+	{
+		CurrentWidget = CreateWidget<UDialogueWidget>(this, DialogueWidgetClass);
+
+	}
+
+	if (!CurrentWidget)
+		return;
+
+	FString CowName = "Bessy";
+	if (CurrentCow)
+		CowName = CurrentCow->CowName;
+	CurrentWidget->AddToViewport();
+	CurrentWidget->SetupDialogue(CowName, _Message);
+}
+
+void AFarmerController::SpeechGame(EReactionType _ExpectedReaction)
+{
+	ChangeViewToCurrentCow();
+
+	if (CurrentWidget)
+	{
+		CurrentWidget->RemoveFromParent();
+	}
+}
+
+void AFarmerController::Continue()
+{
+	if (!CurrentCow)
+		return;
+
+	if (bCowView)
+		ShowDialogue("MOOO moo");
+	else
+		SpeechGame(EReactionType::E_AGRESSIVE);
 }
 
 void AFarmerController::GameLost(FString _Reason)
@@ -79,6 +144,8 @@ void AFarmerController::SetupInputComponent()
 	Super::SetupInputComponent();
 	FInputActionBinding& InteractCompleteBind = InputComponent->BindAction("CompleteInteract", IE_Released, this, &AFarmerController::SuccededInteract);
 	InteractCompleteBind.bConsumeInput = false;
+	FInputActionBinding& InteractBind = InputComponent->BindAction("Interact", IE_Released, this, &AFarmerController::Continue);
+	InteractBind.bConsumeInput = false;
 	InputComponent->BindAction("FailInteract", IE_Released, this, &AFarmerController::FailedInteract);
 }
 
@@ -109,6 +176,10 @@ void AFarmerController::CompleteInteract()
 	bShowMouseCursor = false;
 	SetInputMode(FInputModeGameOnly::FInputModeGameOnly());
 
+	if (CurrentWidget)
+	{
+		CurrentWidget->RemoveFromParent();
+	}
 
 	CurrentCow->SetMovementEnabled(true);
 	CurrentCow = nullptr;
