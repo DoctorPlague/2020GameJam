@@ -8,6 +8,9 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
 
+#include "Gameplay/Cow.h"
+#include "FarmerController.h"
+
 //////////////////////////////////////////////////////////////////////////
 // AFarmerPlayer
 
@@ -46,6 +49,7 @@ AFarmerPlayer::AFarmerPlayer()
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
 }
 
+
 //////////////////////////////////////////////////////////////////////////
 // Input
 
@@ -55,6 +59,11 @@ void AFarmerPlayer::SetupPlayerInputComponent(class UInputComponent* PlayerInput
 	check(PlayerInputComponent);
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+
+	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &AFarmerPlayer::StartSprint);
+	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &AFarmerPlayer::StopSprint);
+
+	PlayerInputComponent->BindAction("Interact", IE_Released, this, &AFarmerPlayer::Interact);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &AFarmerPlayer::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AFarmerPlayer::MoveRight);
@@ -68,7 +77,56 @@ void AFarmerPlayer::SetupPlayerInputComponent(class UInputComponent* PlayerInput
 	PlayerInputComponent->BindAxis("LookUpRate", this, &AFarmerPlayer::LookUpAtRate);
 
 }
+void AFarmerPlayer::StartSprint()
+{
+	GetCharacterMovement()->MaxWalkSpeed = fSprintSpeed;
+}
+void AFarmerPlayer::StopSprint()
+{
+	GetCharacterMovement()->MaxWalkSpeed = fWalkSpeed;
+}
 
+void AFarmerPlayer::Interact()
+{
+	if (!FarmerControllerRef)
+		return;
+
+	ACow* ClosestCow = GetClosestCow();
+	if (!ClosestCow)
+		return;
+
+	FarmerControllerRef->InteractWithCow(ClosestCow);
+	DisableInput(FarmerControllerRef);
+}
+ACow* AFarmerPlayer::GetClosestCow()
+{
+	// No cows
+	if (CurrentCowsInRange.Num() <= 0)
+		return nullptr;
+
+	int iClosestIndex = 0;
+	for (int i = 0; i < CurrentCowsInRange.Num(); i++)
+	{
+		float DistToClosest = (GetActorLocation() - CurrentCowsInRange[iClosestIndex]->GetActorLocation()).Size();
+		float DistToCurrent = (GetActorLocation() - CurrentCowsInRange[i]->GetActorLocation()).Size();
+		if (DistToCurrent < DistToClosest)
+		{
+			iClosestIndex = i;
+		}
+	}
+
+	return CurrentCowsInRange[iClosestIndex];
+}
+
+void AFarmerPlayer::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	if (AFarmerController* FarmerController = Cast<AFarmerController>(NewController))
+	{
+		FarmerControllerRef = FarmerController;
+	}
+}
 
 void AFarmerPlayer::TurnAtRate(float Rate)
 {
