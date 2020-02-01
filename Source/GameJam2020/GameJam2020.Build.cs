@@ -8,6 +8,10 @@ public class GameJam2020 : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "HeadMountedDisplay" });
-	}
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "AIModule", "UMG", "Slate", "SlateCore" });
+
+        // Uncomment if you are using Slate UI
+        PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
+
+    }
 }
