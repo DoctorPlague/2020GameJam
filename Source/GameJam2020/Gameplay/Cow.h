@@ -45,11 +45,18 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void IncreaseHunger();
 
+	void CowComplete();
+
 protected:
+
+	class UMaterialInstanceDynamic* CowDMI;
 
 public:
 	UPROPERTY(BlueprintReadWrite)
 		bool bCanMove = true;
+
+	UPROPERTY(BlueprintReadWrite)
+		bool bGivenMilk = false;
 
 	UPROPERTY(BlueprintReadWrite)
 		float fCowHungerRate = 1.0f;

@@ -10,8 +10,8 @@
 #include "Camera/PlayerCameraManager.h"
 #include "Kismet/GameplayStatics.h"
 #include "Camera/CameraComponent.h"
-
-#include "Engine/World.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Materials/MaterialInstanceDynamic.h"
 
 // Sets default values
 ACow::ACow()
@@ -34,6 +34,7 @@ void ACow::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	CowDMI = GetMesh()->CreateDynamicMaterialInstance(0);
 }
 
 bool ACow::Interact_Implementation(AFarmerPlayer* InteractPlayer)
@@ -69,6 +70,12 @@ void ACow::IncreaseHunger()
 {
 	fCowFullness += fFeedHungerIncrease;
 	fCowFullness = FMath::Min(fCowFullness, 100.0f);	
+}
+
+void ACow::CowComplete()
+{
+	bGivenMilk = true;
+	CowDMI->SetScalarParameterValue("Happy", 1.0f);
 }
 
 // Called every frame
