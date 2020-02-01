@@ -6,8 +6,27 @@
 void UDialogueWidget::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
-
-	InputString = "Moo? Moo moo moo moo moo!? Moooooooooo..";
+	TArray<FString> InputArray;
+	InputArray.Add("Moo? Moo moomoo moo moo!? Moooooooooo..");
+	InputArray.Add("Moo! MOOOOOO!!!!! ... Moo moo.. Moo???");
+	InputArray.Add("Moooooooooooooooooooooooooo... Moo.");
+	InputArray.Add("Moo!? Moo!? Moo moo moomoo moo. Moo moo.");
+	InputArray.Add("Moomoo, moo moo moomoo moo? Moomooo mooo..");
+	InputArray.Add("Moo moo moo moo mooo mooooo mooooo.. mooooooooooooooooooo..");
+	InputArray.Add("Mooooooo? Moooooooo... Moo moo moomoo moo!");
+	InputArray.Add("MOO! Moo.. moo? Moomoo: moo, moo, moomoo, moo..");
+	InputArray.Add("Moo... moo moo?");
+	InputArray.Add("Moo moo moomoo moomoo moo...");
+	InputArray.Add("Moo moo moo moo? Moo moo moomoo moomoomoo, moo! Moomoomoo!!");
+	InputArray.Add("Moo.. moo... moo... moooooooo... mooooooooooooooooooooooooooooooooooooo..");
+	InputArray.Add("Moomoo.. moomoo... moomoomoo...");
+	InputArray.Add("Moo? ... Moo? ... Mooo?");
+	InputArray.Add("Moomoomoomoomoomoomoo... Moo moo?");
+	InputArray.Add("Moo... moo... moo? Moo? Moo?");
+	InputArray.Add("............ Moo");
+	InputArray.Add(".......... Moo .......... Moo? .... ooo...");
+	
+	InputString = InputArray[FMath::RandRange(0, InputArray.Num() - 1)];
 	CowName = "Bessy";
 	FullDialogue = CowName + ": " + InputString;
 	IsDialogueBoxPopulated = false;
@@ -15,8 +34,6 @@ void UDialogueWidget::NativeOnInitialized()
 	TypingSpeedBase = 0.05f;
 	TypingSpeed = 0.05f;
 	TypingTimer = 0.0f; 
-	PopulateDialogueBox();
-
 }
 
 void UDialogueWidget::NativePreConstruct()
@@ -54,6 +71,7 @@ void UDialogueWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 			TypingTimer += InDeltaTime;
 		}	
 	}
+
 }
 
 void UDialogueWidget::PopulateDialogueBox()
@@ -80,5 +98,18 @@ void UDialogueWidget::PopulateDialogueBox()
 		}
 		
 	}
+}
+
+void UDialogueWidget::SetupDialogue(FString _CowName, FString _InputString)
+{
+	InputString = _InputString;
+	CowName = _CowName;
+	FullDialogue = CowName + ": " + InputString;
+	IsDialogueBoxPopulated = false;
+	TypingTimer = 0.0f;
+	DialogueCharIndex = 0;
+	if (DialogueBox)
+		DialogueBox->SetText(FText());
+	PopulateDialogueBox();
 }
 

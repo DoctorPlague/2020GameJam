@@ -60,8 +60,8 @@ void AFarmerPlayer::SetupPlayerInputComponent(class UInputComponent* PlayerInput
 {
 	// Set up gameplay key bindings
 	check(PlayerInputComponent);
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
-	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+	//PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
+	//PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
 	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &AFarmerPlayer::StartSprint);
 	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &AFarmerPlayer::StopSprint);
@@ -129,6 +129,14 @@ ACow* AFarmerPlayer::GetClosestCow()
 	int iClosestIndex = 0;
 	for (int i = 0; i < CurrentCowsInRange.Num(); i++)
 	{
+		// If cow already given milk
+		if (CurrentCowsInRange[i]->bGivenMilk)
+		{
+			// Current closest is completed cow, go next
+			if (i == iClosestIndex)
+				iClosestIndex++;
+			continue;
+		}
 		float DistToClosest = (GetActorLocation() - CurrentCowsInRange[iClosestIndex]->GetActorLocation()).Size();
 		float DistToCurrent = (GetActorLocation() - CurrentCowsInRange[i]->GetActorLocation()).Size();
 		if (DistToCurrent < DistToClosest)
@@ -136,6 +144,9 @@ ACow* AFarmerPlayer::GetClosestCow()
 			iClosestIndex = i;
 		}
 	}
+	// All cows in range had been give milk
+	if (iClosestIndex >= CurrentCowsInRange.Num())
+		return nullptr;
 
 	return CurrentCowsInRange[iClosestIndex];
 }

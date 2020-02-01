@@ -23,8 +23,7 @@ protected:
 	virtual void NativeDestruct();
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime);
 
-	// 
-	void PopulateDialogueBox();
+	void PopulateDialogueBox();	
 
 	bool IsDialogueBoxPopulated;
 	int DialogueCharIndex;
@@ -40,4 +39,7 @@ protected:
 public:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	UTextBlock* DialogueBox;
+
+	UFUNCTION(BlueprintCallable)
+	void SetupDialogue(FString CowName, FString InputString);
 };
