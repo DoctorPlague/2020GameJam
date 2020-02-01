@@ -4,10 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "InteractInterface.h"
 #include "Cow.generated.h"
 
 UCLASS()
-class GAMEJAM2020_API ACow : public ACharacter
+class GAMEJAM2020_API ACow : public ACharacter, public IInteractInterface
 {
 	GENERATED_BODY()
 
@@ -22,6 +23,9 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+		bool Interact(class AFarmerPlayer* InteractPlayer);
+	virtual bool Interact_Implementation(class AFarmerPlayer* InteractPlayer) override;
 
 public:	
 	// Called every frame
@@ -33,7 +37,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetMovementEnabled(bool _bEnabled);
 
+	UFUNCTION(BlueprintCallable)
 	void DecreaseRandHunger();
+	UFUNCTION(BlueprintCallable)
+	void IncreaseHunger();
 
 protected:
 
@@ -67,5 +74,8 @@ public:
 		float fFailInteractLoseMin = 5.0f;
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
 		float fFailInteractLoseMax = 10.0f;
+
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
+		float fFeedHungerIncrease = 30.0f;
 
 };

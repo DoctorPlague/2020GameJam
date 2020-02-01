@@ -97,7 +97,7 @@ void AFarmerController::CompleteInteract()
 		SetViewTargetWithBlend(FarmerPlayerRef, fInteractReturnToPlayerTime);
 
 	bIsInteracting = false;
-	bShowMouseCursor = true;
+	bShowMouseCursor = false;
 	SetInputMode(FInputModeGameOnly::FInputModeGameOnly());
 
 
