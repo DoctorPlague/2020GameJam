@@ -113,6 +113,7 @@ void AFarmerController::CompleteInteract()
 
 	FTimerHandle ReturnControl;
 	GetWorldTimerManager().SetTimer(ReturnControl, this, &AFarmerController::ResumePlayerInput, fInteractReturnToPlayerTime);
+	BI_OnInteractComplete();
 }
 
 

@@ -58,6 +58,8 @@ void UDialogueWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 
 void UDialogueWidget::PopulateDialogueBox()
 {
+	if (!DialogueBox)
+		return;
 	FString CurrentString = DialogueBox->GetText().ToString();
 	if (CurrentString == FullDialogue)
 	{
