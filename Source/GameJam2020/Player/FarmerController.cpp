@@ -11,6 +11,8 @@
 #include "Engine/World.h"
 #include "TimerManager.h"
 
+#include "Engine.h"
+
 void AFarmerController::InteractWithCow(class ACow* _Cow)
 {
 	if (!FarmerPlayerRef)
@@ -18,7 +20,15 @@ void AFarmerController::InteractWithCow(class ACow* _Cow)
 	CurrentCow = _Cow;
 	FVector CowToPlayerDir = (FarmerPlayerRef->GetActorLocation() - _Cow->GetActorLocation()).GetSafeNormal();
 
-	FVector NewCamDir = FMath::Lerp(_Cow->GetActorRightVector(), CowToPlayerDir, 0.6f);
+	FVector CowSideVector = _Cow->GetActorRightVector();
+	float Dot = FVector::DotProduct(CowToPlayerDir, _Cow->GetActorRightVector());
+	if (Dot > 0)
+	{
+		CowSideVector *= -1.0f;
+	}
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, "Dot product: " + FString::SanitizeFloat(Dot));
+
+	FVector NewCamDir = FMath::Lerp(CowSideVector, CowToPlayerDir, 0.6f);
 
 	FVector NewLocation = _Cow->GetActorLocation() + NewCamDir * 500.0f;
 	NewLocation.Z += 100.0f;
