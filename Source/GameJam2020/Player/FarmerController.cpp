@@ -47,8 +47,9 @@ void AFarmerController::InteractWithCow(class ACow* _Cow)
 
 	bIsInteracting = true;
 	bShowMouseCursor = true;
-	FInputModeGameAndUI InputMode;
-	InputMode.SetHideCursorDuringCapture(false);
+	FInputModeUIOnly InputMode;
+	//FInputModeGameAndUI InputMode;
+	//InputMode.SetHideCursorDuringCapture(true);
 	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 	SetInputMode(InputMode);
 
