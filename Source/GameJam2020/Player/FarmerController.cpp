@@ -19,8 +19,9 @@ void AFarmerController::InteractWithCow(class ACow* _Cow)
 	CurrentCow = _Cow;
 
 	//CurrentStage = ECurrentStage::E_INITIALDIALOGUE;
-	ChangeToDialogue();
+	ChangeToDialogue("MOOOOCUK");
 
+	bComplete = false;
 	bIsInteracting = true;
 	bShowMouseCursor = true;
 	//FInputModeUIOnly InputMode;
@@ -52,7 +53,23 @@ void AFarmerController::Continue()
 	switch (CurrentStage)
 	{
 	case ECurrentStage::E_INITIALDIALOGUE:
-		ChangeToSpeechGame();
+
+		if (bComplete)
+		{
+			if (bCowWon)
+			{
+				SuccededInteract();
+			}
+			else
+			{
+				FailedInteract();
+			}
+		}
+		else
+		{
+			bComplete = false;
+			ChangeToSpeechGame();
+		}
 		break;
 	case ECurrentStage::E_MINIGAME:
 		ChangeToCowView();
@@ -61,7 +78,7 @@ void AFarmerController::Continue()
 		ChangeToPlayerView();
 		break;
 	case ECurrentStage::E_PLAYERRESPONSE:
-		ChangeToDialogue();
+		ChangeToDialogue("Moo Moo mooooo mo!");
 		break;
 	default:
 		break;
@@ -151,6 +168,11 @@ void AFarmerController::ChangeViewToCurrentCowSpeechGame()
 
 void AFarmerController::ChangeViewToPlayer()
 {
+	if (CurrentWidget)
+	{
+		CurrentWidget->RemoveFromParent();
+	}
+
 	if (FarmerPlayerRef)
 	{
 		FarmerPlayerRef->ResponseCamera->SetActive(true);
@@ -158,6 +180,7 @@ void AFarmerController::ChangeViewToPlayer()
 		SetViewTargetWithBlend(FarmerPlayerRef, fChangeToCowViewTime);
 	}
 
+	bComplete = true;
 	CurrentStage = ECurrentStage::E_PLAYERRESPONSE;
 
 	BI_OnStartPlayerView();
@@ -167,24 +190,11 @@ void AFarmerController::ChangeViewToPlayer()
 void AFarmerController::ShowDialogue(const FString& _Message)
 {
 	GetWorldTimerManager().ClearTimer(ChangeView);
-	if (!CurrentWidget && DialogueWidgetClass)
-	{
-		CurrentWidget = CreateWidget<UDialogueWidget>(this, DialogueWidgetClass);
-
-	}
-
-	if (!CurrentWidget)
-		return;
-
-	
-	FString CowName = "Bessy";
-	if (CurrentCow)
-		CowName = CurrentCow->CowName;
-	CurrentWidget->AddToViewport();
-	CurrentWidget->SetupDialogue(CowName, _Message);
+	ShowCowDialogue(_Message);
 
 	BI_OnConversationView();
 }
+
 
 void AFarmerController::SpeechGame(EReactionType _ExpectedReaction)
 {
@@ -196,18 +206,54 @@ void AFarmerController::CowExpression(EExpressionType _NewExpression)
 {
 	GetWorldTimerManager().ClearTimer(ChangeView);
 
+	FString Message = "Wow";
+	switch (_NewExpression)
+	{
+	case EExpressionType::E_ANGRY:
+		Message = "MOOOOO!";
+		break;
+	case EExpressionType::E_HAPPY:
+		Message = "Mo Moooo Mo!";
+		break;
+	case EExpressionType::E_SAD:
+		Message = "Mooo...";
+		break;
+	default:
+		break;
+	}
+	ShowCowDialogue(Message);
+
 	BI_OnCowView();
 }
 
 void AFarmerController::PlayerResponse(EReactionType _ExpectedReaction)
 {
+	bComplete = true;
 	GetWorldTimerManager().ClearTimer(ChangeView);
-	BI_OnPlayerView();
+	BI_OnPlayerView(_ExpectedReaction);
 }
 
+void AFarmerController::ShowCowDialogue(const FString& _Message)
+{
+	if (!CurrentWidget && DialogueWidgetClass)
+	{
+		CurrentWidget = CreateWidget<UDialogueWidget>(this, DialogueWidgetClass);
+
+	}
+
+	if (!IsValid(CurrentWidget))
+		return;
+
+
+	FString CowName = "Bessy";
+	if (CurrentCow)
+		CowName = CurrentCow->CowName;
+	CurrentWidget->AddToViewport();
+	CurrentWidget->SetupDialogue(CowName, _Message);
+}
 
 // ########### CHANGE TO ###############
-void AFarmerController::ChangeToDialogue()
+void AFarmerController::ChangeToDialogue(const FString& Message)
 {
 	if (ChangeView.IsValid())
 	{
@@ -217,7 +263,7 @@ void AFarmerController::ChangeToDialogue()
 	ChangeViewToConversation();
 
 	FTimerDelegate DialogueDelegate;
-	DialogueDelegate.BindUFunction(this, FName("ShowDialogue"), FString("MOOO moo"));
+	DialogueDelegate.BindUFunction(this, FName("ShowDialogue"), Message);
 	GetWorldTimerManager().SetTimer(ChangeView, DialogueDelegate, fChangeToConverstationViewTime, false);
 }
 
@@ -237,7 +283,7 @@ void AFarmerController::ChangeToSpeechGame()
 	ChangeViewToCurrentCowSpeechGame();
 
 	FTimerDelegate SpeechGameDelegate;
-	SpeechGameDelegate.BindUFunction(this, FName("SpeechGame"), EReactionType::E_AGRESSIVE);
+	SpeechGameDelegate.BindUFunction(this, FName("SpeechGame"), EReactionType::E_ANGRY);
 	GetWorldTimerManager().SetTimer(ChangeView, SpeechGameDelegate, fChangeToCowViewTime, false);
 }
 
@@ -257,6 +303,11 @@ void AFarmerController::ChangeToCowView()
 
 void AFarmerController::ChangeToPlayerView()
 {
+	if (CurrentWidget)
+	{
+		if (!CurrentWidget->IsComplete())
+			return;
+	}
 	if (ChangeView.IsValid())
 	{
 		return;
@@ -265,8 +316,16 @@ void AFarmerController::ChangeToPlayerView()
 	ChangeViewToPlayer();
 
 	FTimerDelegate PlayerResponseDelegate;
-	PlayerResponseDelegate.BindUFunction(this, FName("PlayerResponse"), EReactionType::E_PLEASANT);
+	PlayerResponseDelegate.BindUFunction(this, FName("PlayerResponse"), EReactionType::E_HAPPY);
 	GetWorldTimerManager().SetTimer(ChangeView, PlayerResponseDelegate, fChangeToCowViewTime, false);
+}
+
+void AFarmerController::CompletedReaction(EReactionType _ExpectedReaction, EReactionType _GivenReaction)
+{
+	FString CowResponse = "MOOO!? :(";
+	if (_ExpectedReaction == _GivenReaction)
+		CowResponse = "Moooo :)";
+	ChangeToDialogue(CowResponse);
 }
 
 
@@ -317,6 +376,8 @@ void AFarmerController::FailedInteract()
 
 void AFarmerController::StartCompleteInteract()
 {
+	GetWorldTimerManager().ClearTimer(ChangeView);
+
 	if (FarmerPlayerRef)
 	{
 		FarmerPlayerRef->ResponseCamera->SetActive(false);
