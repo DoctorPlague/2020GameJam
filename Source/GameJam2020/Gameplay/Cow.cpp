@@ -13,6 +13,7 @@
 #include "Camera/CameraComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "CowAnimInstance.h"
 
 // Sets default values
 ACow::ACow()
@@ -41,6 +42,10 @@ void ACow::BeginPlay()
 	Super::BeginPlay();
 	
 	CowDMI = GetMesh()->CreateDynamicMaterialInstance(0);
+	if (GetMesh())
+	{
+		CowAnimInstance = Cast<UCowAnimInstance>(GetMesh()->GetAnimInstance());
+	}
 }
 
 bool ACow::Interact_Implementation(AFarmerPlayer* InteractPlayer)
@@ -84,6 +89,39 @@ void ACow::CowComplete()
 	CowDMI->SetScalarParameterValue("Happy", 1.0f);
 }
 
+void ACow::PlayReaction(EReactionType ReactionType, float Intensity)
+{
+	switch (ReactionType)
+	{
+	case EReactionType::E_ANGRY:
+		if (CowAnimInstance)
+		{
+			CowAnimInstance->PlayAngryAnimation(Intensity);
+		}
+		break;
+	case EReactionType::E_SAD:
+		if (CowAnimInstance)
+		{
+			CowAnimInstance->PlaySadAnimation(Intensity);
+		}
+		break;
+	case EReactionType::E_HAPPY:
+		if (CowAnimInstance)
+		{
+			CowAnimInstance->PlayHappyAnimation(Intensity);
+		}
+		break;
+	case EReactionType::E_NEUTRAL:
+		if (CowAnimInstance)
+		{
+			CowAnimInstance->PlayNeutralAnimation(Intensity);
+		}
+		break;
+	default:
+		break;
+	}
+}
+
 // Called every frame
 void ACow::Tick(float DeltaTime)
 {
@@ -123,6 +161,19 @@ void ACow::Tick(float DeltaTime)
 
 	fCowFullness -= (fCowHungerRate / fOverallHungerRateSlow) * DeltaTime;
 	fCowFullness = FMath::Max(fCowFullness, 0.0f);
+
+	if (fCowFullness <= 0.0f)
+	{
+		if (!FarmerControllerRef)
+		{
+			if (AFarmerController* FarmerController = Cast<AFarmerController>(GetWorld()->GetFirstLocalPlayerFromController()))
+			{
+				FarmerControllerRef = FarmerController;
+			}
+		}
+		if (FarmerControllerRef)
+			FarmerControllerRef->GameLost(CowName + " Died");
+	}
 
 }
 

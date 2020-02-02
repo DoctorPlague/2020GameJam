@@ -39,4 +39,13 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UPawnMovementComponent* MovementComponent;
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void PlayAngryAnimation(float SoundIntensity);
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void PlaySadAnimation(float SoundIntensity);
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void PlayHappyAnimation(float SoundIntensity);
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void PlayNeutralAnimation(float SoundIntensity);
 };

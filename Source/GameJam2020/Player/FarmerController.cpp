@@ -77,7 +77,7 @@ void AFarmerController::Continue()
 		//ChangeToCowView();
 		break;
 	case ECurrentStage::E_COWREACTION:
-		ChangeToPlayerView();
+		ChangeToPlayerView(CowReaction);
 		break;
 	case ECurrentStage::E_PLAYERRESPONSE:
 		//ChangeToDialogue("Moo Moo mooooo mo!");
@@ -299,11 +299,11 @@ void AFarmerController::ChangeToCowView()
 	ChangeViewToCurrentCow();
 
 	FTimerDelegate CowViewDelegate;
-	CowViewDelegate.BindUFunction(this, FName("CowExpression"), EExpressionType::E_HAPPY);
+	CowViewDelegate.BindUFunction(this, FName("CowExpression"), CowReaction);
 	GetWorldTimerManager().SetTimer(ChangeView, CowViewDelegate, fChangeToCowViewTime, false);
 }
 
-void AFarmerController::ChangeToPlayerView()
+void AFarmerController::ChangeToPlayerView(EReactionType _ExpectedReaction)
 {
 	if (CurrentWidget)
 	{
@@ -318,20 +318,28 @@ void AFarmerController::ChangeToPlayerView()
 	ChangeViewToPlayer();
 
 	FTimerDelegate PlayerResponseDelegate;
-	PlayerResponseDelegate.BindUFunction(this, FName("PlayerResponse"), EReactionType::E_HAPPY);
+	PlayerResponseDelegate.BindUFunction(this, FName("PlayerResponse"), _ExpectedReaction);
 	GetWorldTimerManager().SetTimer(ChangeView, PlayerResponseDelegate, fChangeToCowViewTime, false);
 }
 
-void AFarmerController::OnMinigameCompleted(bool _Succeeded)
+void AFarmerController::OnMinigameCompleted(bool _Succeeded, EReactionType _ExpectedReaction)
 {
 	if (!_Succeeded)
 	{
 		FailedInteract();
 		return;
 	}
-
+	CowReaction = _ExpectedReaction;
 	ChangeToCowView();
 
+}
+
+void AFarmerController::SetCurrentCowReaction(EReactionType _ExpectedReaction, float _fIntensity)
+{
+	if (CurrentCow)
+	{
+		//CurrentCow->FunctionBoy
+	}
 }
 
 void AFarmerController::CompletedReaction(EReactionType _ExpectedReaction, EReactionType _GivenReaction)
@@ -345,6 +353,11 @@ void AFarmerController::CompletedReaction(EReactionType _ExpectedReaction, EReac
 
 void AFarmerController::ShowEndScreen(FString _Status, FString _Reason)
 {
+	if (bGameComplete)
+		return;
+
+	bGameComplete = true;
+
 	if (FarmerPlayerRef)
 		FarmerPlayerRef->DisableInput(this);
 
