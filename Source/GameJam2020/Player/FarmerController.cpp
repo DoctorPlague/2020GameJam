@@ -128,7 +128,7 @@ void AFarmerController::ChangeViewToConversation()
 
 void AFarmerController::ChangeViewToCurrentCow()
 {
-	if (CurrentWidget)
+	if (IsValid(CurrentWidget))
 	{
 		CurrentWidget->RemoveFromParent();
 	}
@@ -346,11 +346,16 @@ void AFarmerController::GameLost(FString _Reason)
 void AFarmerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
-	FInputActionBinding& InteractCompleteBind = InputComponent->BindAction("CompleteInteract", IE_Released, this, &AFarmerController::SuccededInteract);
-	InteractCompleteBind.bConsumeInput = false;
-	FInputActionBinding& InteractBind = InputComponent->BindAction("Interact", IE_Released, this, &AFarmerController::Continue);
+
+	FInputActionBinding& InteractBind = InputComponent->BindAction("Interact", IE_Pressed, this, &AFarmerController::Continue);
 	InteractBind.bConsumeInput = false;
-	InputComponent->BindAction("FailInteract", IE_Released, this, &AFarmerController::FailedInteract);
+
+	InputComponent->BindAction("Cancel", IE_Pressed, this, &AFarmerController::CancelInteract);
+
+	// TEMP
+	FInputActionBinding& InteractCompleteBind = InputComponent->BindAction("CompleteInteract", IE_Pressed, this, &AFarmerController::SuccededInteract);
+	InteractCompleteBind.bConsumeInput = false;
+	InputComponent->BindAction("FailInteract", IE_Pressed, this, &AFarmerController::FailedInteract);
 }
 
 void AFarmerController::SuccededInteract()
@@ -370,6 +375,13 @@ void AFarmerController::FailedInteract()
 {
 	if (CurrentCow)
 		CurrentCow->DecreaseRandHunger();
+
+	StartCompleteInteract();
+}
+
+void AFarmerController::CancelInteract()
+{
+
 
 	StartCompleteInteract();
 }

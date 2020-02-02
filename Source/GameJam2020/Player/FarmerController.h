@@ -107,7 +107,9 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void SuccededInteract();
 	UFUNCTION(BlueprintCallable)
-	void FailedInteract();
+		void FailedInteract();
+	UFUNCTION(BlueprintCallable)
+		void CancelInteract();
 
 	UFUNCTION()
 	void AddSuccessfulCow(class ACow* _Cow);
