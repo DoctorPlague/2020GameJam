@@ -52,6 +52,9 @@ public:
 	void ChangeToPlayerView();
 
 	UFUNCTION(BlueprintCallable)
+		void OnMinigameCompleted(bool _Succeeded);
+
+	UFUNCTION(BlueprintCallable)
 		void CompletedReaction(EReactionType _ExpectedReaction, EReactionType _GivenReaction);
 
 	UFUNCTION(BlueprintImplementableEvent)
@@ -107,7 +110,9 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void SuccededInteract();
 	UFUNCTION(BlueprintCallable)
-	void FailedInteract();
+		void FailedInteract();
+	UFUNCTION(BlueprintCallable)
+		void CancelInteract();
 
 	UFUNCTION()
 	void AddSuccessfulCow(class ACow* _Cow);
@@ -123,6 +128,7 @@ public:
 
 	UPROPERTY(BlueprintReadWrite)
 	TArray<ACow*> CowsComplete;
+
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		int iNumberOfCowsNeeded = 5;
@@ -150,4 +156,10 @@ protected:
 		TSubclassOf<class UDialogueWidget> DialogueWidgetClass;
 
 	UDialogueWidget* CurrentWidget;
+
+
+	UPROPERTY(EditDefaultsOnly)
+		float FTargetDistanceInFrontofCow = 300.0f;
+	UPROPERTY(BlueprintReadWrite)
+		FVector TargetDestination = FVector(0.0f);
 };

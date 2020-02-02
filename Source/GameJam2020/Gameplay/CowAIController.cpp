@@ -79,7 +79,7 @@ void ACowAIController::OnPossess(APawn* InPawn)
 	UE_LOG(LogTemp, Warning, TEXT("On Possess"))
 	
 	Cow = Cast<ACow>(InPawn);
-	WanderCooldownLength = 0.0f;
+	WanderCooldownLength = 3.0f;
 	WanderCooldownTimer = 0.0f;
 	TimeSpentWandering = 0.0f;
 	IsWandering = false;
