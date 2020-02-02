@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "EnumsStructs.h"
 #include "InteractInterface.h"
 #include "Cow.generated.h"
 
@@ -49,11 +50,16 @@ public:
 
 	void CowComplete();
 
+	UFUNCTION(BlueprintCallable)
+	void PlayReaction(EReactionType ReactionType, float Intensity);
+
 protected:
 
 	class UMaterialInstanceDynamic* CowDMI;
 
 	class AFarmerController* FarmerControllerRef;
+
+	class UCowAnimInstance* CowAnimInstance;
 
 public:
 	UPROPERTY(BlueprintReadWrite)
