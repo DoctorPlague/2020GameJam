@@ -163,6 +163,9 @@ protected:
 
 	UDialogueWidget* CurrentWidget;
 
+	UPROPERTY(BlueprintReadWrite)
+	bool bGameComplete = false;
+
 
 	UPROPERTY(EditDefaultsOnly)
 		float FTargetDistanceInFrontofCow = 300.0f;
