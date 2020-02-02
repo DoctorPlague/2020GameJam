@@ -353,6 +353,11 @@ void AFarmerController::CompletedReaction(EReactionType _ExpectedReaction, EReac
 
 void AFarmerController::ShowEndScreen(FString _Status, FString _Reason)
 {
+	if (bGameComplete)
+		return;
+
+	bGameComplete = true;
+
 	if (FarmerPlayerRef)
 		FarmerPlayerRef->DisableInput(this);
 

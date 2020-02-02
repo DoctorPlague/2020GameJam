@@ -99,7 +99,7 @@ public:
 		float fFeedHungerIncrease = 100.0f;
 
 
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		FString CowName = "Bessy";
 
 };

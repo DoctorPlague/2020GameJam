@@ -162,6 +162,19 @@ void ACow::Tick(float DeltaTime)
 	fCowFullness -= (fCowHungerRate / fOverallHungerRateSlow) * DeltaTime;
 	fCowFullness = FMath::Max(fCowFullness, 0.0f);
 
+	if (fCowFullness <= 0.0f)
+	{
+		if (!FarmerControllerRef)
+		{
+			if (AFarmerController* FarmerController = Cast<AFarmerController>(GetWorld()->GetFirstLocalPlayerFromController()))
+			{
+				FarmerControllerRef = FarmerController;
+			}
+		}
+		if (FarmerControllerRef)
+			FarmerControllerRef->GameLost(CowName + " Died");
+	}
+
 }
 
 // Called to bind functionality to input

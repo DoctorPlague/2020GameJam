@@ -80,7 +80,7 @@ void ACowAIController::OnPossess(APawn* InPawn)
 	
 	Cow = Cast<ACow>(InPawn);
 	WanderCooldownLength = 3.0f;
-	WanderCooldownTimer = 0.0f;
+	WanderCooldownTimer = 3.0f;
 	TimeSpentWandering = 0.0f;
 	IsWandering = false;
 }
