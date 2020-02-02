@@ -389,10 +389,6 @@ void AFarmerController::SetupInputComponent()
 
 	InputComponent->BindAction("Cancel", IE_Pressed, this, &AFarmerController::CancelInteract);
 
-	// TEMP
-	FInputActionBinding& InteractCompleteBind = InputComponent->BindAction("CompleteInteract", IE_Pressed, this, &AFarmerController::SuccededInteract);
-	InteractCompleteBind.bConsumeInput = false;
-	InputComponent->BindAction("FailInteract", IE_Pressed, this, &AFarmerController::FailedInteract);
 }
 
 void AFarmerController::SuccededInteract()
