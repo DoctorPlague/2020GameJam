@@ -20,6 +20,8 @@ public:
 		class UWidgetComponent* HungryWidget;
 
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
+		class UCameraComponent* CowMinigameView;
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
 		class UCameraComponent* CowView;
 
 protected:
@@ -50,6 +52,8 @@ public:
 protected:
 
 	class UMaterialInstanceDynamic* CowDMI;
+
+	class AFarmerController* FarmerControllerRef;
 
 public:
 	UPROPERTY(BlueprintReadWrite)
