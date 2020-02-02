@@ -299,7 +299,7 @@ void AFarmerController::ChangeToCowView()
 	ChangeViewToCurrentCow();
 
 	FTimerDelegate CowViewDelegate;
-	CowViewDelegate.BindUFunction(this, FName("CowExpression"), EExpressionType::E_HAPPY);
+	CowViewDelegate.BindUFunction(this, FName("CowExpression"), CowReaction);
 	GetWorldTimerManager().SetTimer(ChangeView, CowViewDelegate, fChangeToCowViewTime, false);
 }
 
@@ -332,6 +332,14 @@ void AFarmerController::OnMinigameCompleted(bool _Succeeded, EReactionType _Expe
 	CowReaction = _ExpectedReaction;
 	ChangeToCowView();
 
+}
+
+void AFarmerController::SetCurrentCowReaction(EReactionType _ExpectedReaction, float _fIntensity)
+{
+	if (CurrentCow)
+	{
+		//CurrentCow->FunctionBoy
+	}
 }
 
 void AFarmerController::CompletedReaction(EReactionType _ExpectedReaction, EReactionType _GivenReaction)

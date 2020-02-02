@@ -53,6 +53,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		void OnMinigameCompleted(bool _Succeeded, EReactionType _ExpectedReaction);
+	UFUNCTION(BlueprintCallable)
+		void SetCurrentCowReaction(EReactionType _ExpectedReaction, float _fIntensity);
 
 	UFUNCTION(BlueprintCallable)
 		void CompletedReaction(EReactionType _ExpectedReaction, EReactionType _GivenReaction);
