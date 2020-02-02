@@ -77,7 +77,7 @@ void AFarmerController::Continue()
 		//ChangeToCowView();
 		break;
 	case ECurrentStage::E_COWREACTION:
-		ChangeToPlayerView();
+		ChangeToPlayerView(CowReaction);
 		break;
 	case ECurrentStage::E_PLAYERRESPONSE:
 		//ChangeToDialogue("Moo Moo mooooo mo!");
@@ -303,7 +303,7 @@ void AFarmerController::ChangeToCowView()
 	GetWorldTimerManager().SetTimer(ChangeView, CowViewDelegate, fChangeToCowViewTime, false);
 }
 
-void AFarmerController::ChangeToPlayerView()
+void AFarmerController::ChangeToPlayerView(EReactionType _ExpectedReaction)
 {
 	if (CurrentWidget)
 	{
@@ -318,18 +318,18 @@ void AFarmerController::ChangeToPlayerView()
 	ChangeViewToPlayer();
 
 	FTimerDelegate PlayerResponseDelegate;
-	PlayerResponseDelegate.BindUFunction(this, FName("PlayerResponse"), EReactionType::E_HAPPY);
+	PlayerResponseDelegate.BindUFunction(this, FName("PlayerResponse"), _ExpectedReaction);
 	GetWorldTimerManager().SetTimer(ChangeView, PlayerResponseDelegate, fChangeToCowViewTime, false);
 }
 
-void AFarmerController::OnMinigameCompleted(bool _Succeeded)
+void AFarmerController::OnMinigameCompleted(bool _Succeeded, EReactionType _ExpectedReaction)
 {
 	if (!_Succeeded)
 	{
 		FailedInteract();
 		return;
 	}
-
+	CowReaction = _ExpectedReaction;
 	ChangeToCowView();
 
 }
