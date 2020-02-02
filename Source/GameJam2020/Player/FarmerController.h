@@ -33,7 +33,7 @@ public:
 	UFUNCTION()
 	void SpeechGame(EReactionType _ExpectedReaction);
 	UFUNCTION()
-	void CowExpression(EExpressionType _NewExpression);
+	void CowExpression(EReactionType _NewExpression);
 	UFUNCTION()
 	void PlayerResponse(EReactionType _ExpectedReaction);
 

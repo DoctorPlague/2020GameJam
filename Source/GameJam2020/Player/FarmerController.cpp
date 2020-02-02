@@ -21,7 +21,7 @@ void AFarmerController::InteractWithCow(class ACow* _Cow)
 	TargetDestination = CurrentCow->GetActorLocation() + CurrentCow->GetActorForwardVector() * FTargetDistanceInFrontofCow;
 
 	//CurrentStage = ECurrentStage::E_INITIALDIALOGUE;
-	ChangeToDialogue("MOOOOCUK");
+	ChangeToDialogue("");
 
 	bComplete = false;
 	bIsInteracting = true;
@@ -133,6 +133,7 @@ void AFarmerController::ChangeViewToCurrentCow()
 	if (IsValid(CurrentWidget))
 	{
 		CurrentWidget->RemoveFromParent();
+		CurrentWidget = nullptr;
 	}
 
 	if (CurrentCow)
@@ -153,6 +154,7 @@ void AFarmerController::ChangeViewToCurrentCowSpeechGame()
 	if (CurrentWidget)
 	{
 		CurrentWidget->RemoveFromParent();
+		CurrentWidget = nullptr;
 	}
 
 
@@ -173,6 +175,7 @@ void AFarmerController::ChangeViewToPlayer()
 	if (CurrentWidget)
 	{
 		CurrentWidget->RemoveFromParent();
+		CurrentWidget = nullptr;
 	}
 
 	if (FarmerPlayerRef)
@@ -204,21 +207,24 @@ void AFarmerController::SpeechGame(EReactionType _ExpectedReaction)
 	BI_OnSpeechGameView();
 }
 
-void AFarmerController::CowExpression(EExpressionType _NewExpression)
+void AFarmerController::CowExpression(EReactionType _NewExpression)
 {
 	GetWorldTimerManager().ClearTimer(ChangeView);
 
 	FString Message = "Wow";
 	switch (_NewExpression)
 	{
-	case EExpressionType::E_ANGRY:
+	case EReactionType::E_ANGRY:
 		Message = "MOOOOO!";
 		break;
-	case EExpressionType::E_HAPPY:
+	case EReactionType::E_HAPPY:
 		Message = "Mo Moooo Mo!";
 		break;
-	case EExpressionType::E_SAD:
-		Message = "Mooo...";
+	case EReactionType::E_SAD:
+		Message = "Mooo... mo moo";
+		break;
+	case EReactionType::E_NEUTRAL:
+		Message = "..... Moo";
 		break;
 	default:
 		break;
@@ -346,7 +352,10 @@ void AFarmerController::CompletedReaction(EReactionType _ExpectedReaction, EReac
 {
 	FString CowResponse = "MOOO!? :(";
 	if (_ExpectedReaction == _GivenReaction)
+	{
 		CowResponse = "Moooo :)";
+		bCowWon = true;
+	}
 	ChangeToDialogue(CowResponse);
 }
 
@@ -430,6 +439,7 @@ void AFarmerController::StartCompleteInteract()
 	if (CurrentWidget)
 	{
 		CurrentWidget->RemoveFromParent();
+		CurrentWidget = nullptr;
 	}
 	
 	BI_OnStartInteractComplete();
@@ -447,6 +457,7 @@ void AFarmerController::CompleteInteract()
 	if (CurrentWidget)
 	{
 		CurrentWidget->RemoveFromParent();
+		CurrentWidget = nullptr;
 	}
 
 	if (CurrentCow)

@@ -6,7 +6,6 @@
 void UDialogueWidget::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
-	TArray<FString> InputArray;
 	InputArray.Add("Moo? Moo moomoo moo moo!? Moooooooooo..");
 	InputArray.Add("Moo! MOOOOOO!!!!! ... Moo moo.. Moo???");
 	InputArray.Add("Moooooooooooooooooooooooooo... Moo.");
@@ -103,6 +102,10 @@ void UDialogueWidget::PopulateDialogueBox()
 void UDialogueWidget::SetupDialogue(FString _CowName, FString _InputString)
 {
 	InputString = _InputString;
+	if (InputString == "")
+	{
+		InputString = InputArray[FMath::RandRange(0, InputArray.Num() - 1)];
+	}
 	CowName = _CowName;
 	FullDialogue = CowName + ": " + InputString;
 	IsDialogueBoxPopulated = false;

@@ -35,13 +35,14 @@ protected:
 	float TypingSpeed;
 	float TypingTimer;
 
+	TArray<FString> InputArray;
 	
 public:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	UTextBlock* DialogueBox;
 
 	UFUNCTION(BlueprintCallable)
-	void SetupDialogue(FString CowName, FString InputString);
+	void SetupDialogue(FString CowName, FString InputString = "");
 
 	UFUNCTION(BlueprintPure)
 		bool IsComplete();
