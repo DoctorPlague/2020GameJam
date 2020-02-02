@@ -49,10 +49,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ChangeToCowView();
 	UFUNCTION(BlueprintCallable)
-	void ChangeToPlayerView();
+	void ChangeToPlayerView(EReactionType _ExpectedReaction);
 
 	UFUNCTION(BlueprintCallable)
-		void OnMinigameCompleted(bool _Succeeded);
+		void OnMinigameCompleted(bool _Succeeded, EReactionType _ExpectedReaction);
+	UFUNCTION(BlueprintCallable)
+		void SetCurrentCowReaction(EReactionType _ExpectedReaction, float _fIntensity);
 
 	UFUNCTION(BlueprintCallable)
 		void CompletedReaction(EReactionType _ExpectedReaction, EReactionType _GivenReaction);
@@ -133,7 +135,11 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		int iNumberOfCowsNeeded = 5;
 
+	UPROPERTY(BlueprintReadWrite)
 	ECurrentStage CurrentStage = ECurrentStage::E_INITIALDIALOGUE;
+	UPROPERTY(BlueprintReadWrite)
+	EReactionType CowReaction;
+
 protected:
 	FTimerHandle ChangeView;
 
