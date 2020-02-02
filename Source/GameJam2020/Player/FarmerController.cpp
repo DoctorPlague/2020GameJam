@@ -20,8 +20,7 @@ void AFarmerController::InteractWithCow(class ACow* _Cow)
 
 	TargetDestination = CurrentCow->GetActorLocation() + CurrentCow->GetActorForwardVector() * FTargetDistanceInFrontofCow;
 
-	//CurrentStage = ECurrentStage::E_INITIALDIALOGUE;
-	ChangeToDialogue("");
+	CurrentStage = ECurrentStage::E_INITIALDIALOGUE;
 
 	bComplete = false;
 	bIsInteracting = true;
@@ -31,6 +30,8 @@ void AFarmerController::InteractWithCow(class ACow* _Cow)
 	InputMode.SetHideCursorDuringCapture(false);
 	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 	SetInputMode(InputMode);
+
+	ChangeToDialogue("");
 
 	if (CurrentCow)
 		CurrentCow->SetMovementEnabled(false);
@@ -477,6 +478,8 @@ void AFarmerController::CompleteInteract()
 
 void AFarmerController::AddSuccessfulCow(ACow* _Cow)
 {
+	GetWorldTimerManager().ClearTimer(ChangeView);
+
 	CowsComplete.Add(_Cow);
 	_Cow->CowComplete();
 
