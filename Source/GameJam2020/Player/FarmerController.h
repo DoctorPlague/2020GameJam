@@ -7,6 +7,14 @@
 #include "EnumsStructs.h"
 #include "FarmerController.generated.h"
 
+UENUM(BlueprintType)		//"BlueprintType" is essential to include
+enum class ECurrentStage : uint8
+{
+	E_INITIALDIALOGUE 	UMETA(DisplayName = "Initial Dialogue"),
+	E_MINIGAME 	UMETA(DisplayName = "Minigame"),
+	E_COWREACTION 	UMETA(DisplayName = "Cow Reaction"),
+	E_PLAYERRESPONSE 	UMETA(DisplayName = "Player Response"),
+};
 /**
  * 
  */
@@ -22,19 +30,34 @@ public:
 	void ShowDialogue(const FString& _Message);
 	UFUNCTION(BlueprintCallable)
 	void SpeechGame(EReactionType _ExpectedReaction);
+	UFUNCTION(BlueprintCallable)
+		void CowExpression(EExpressionType _NewExpression);
+	UFUNCTION(BlueprintCallable)
+		void PlayerResponse(EReactionType _ExpectedReaction);
 
 	void Continue();
 	void ChangeToDialogue();
 	void ChangeToSpeechGame();
+	void ChangeToCowView();
+	void ChangeToPlayerView();
 
 	UFUNCTION(BlueprintImplementableEvent)
 		void BI_OnStartConversationView();
 	UFUNCTION(BlueprintImplementableEvent)
+		void BI_OnStartSpeechGameView();
+	UFUNCTION(BlueprintImplementableEvent)
 		void BI_OnStartCowView();
+	UFUNCTION(BlueprintImplementableEvent)
+		void BI_OnStartPlayerView();
+
 	UFUNCTION(BlueprintImplementableEvent)
 		void BI_OnConversationView();
 	UFUNCTION(BlueprintImplementableEvent)
 		void BI_OnCowView();
+	UFUNCTION(BlueprintImplementableEvent)
+		void BI_OnSpeechGameView();
+	UFUNCTION(BlueprintImplementableEvent)
+		void BI_OnPlayerView();
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void BI_OnAddSuccessfulCow(float _PercentageComplete);
@@ -62,6 +85,8 @@ protected:
 
 	void ChangeViewToConversation();
 	void ChangeViewToCurrentCow();
+	void ChangeViewToCurrentCowSpeechGame();
+	void ChangeViewToPlayer();
 
 	void StartCompleteInteract();
 	void CompleteInteract();
@@ -87,7 +112,11 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		int iNumberOfCowsNeeded = 5;
+
+	ECurrentStage CurrentStage = ECurrentStage::E_INITIALDIALOGUE;
 protected:
+	FTimerHandle ChangeView;
+
 	class ACow* CurrentCow;
 
 	UPROPERTY(BlueprintReadWrite)

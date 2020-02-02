@@ -113,3 +113,8 @@ void UDialogueWidget::SetupDialogue(FString _CowName, FString _InputString)
 	PopulateDialogueBox();
 }
 
+bool UDialogueWidget::IsComplete()
+{
+	return IsDialogueBoxPopulated;
+}
+

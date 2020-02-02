@@ -48,6 +48,11 @@ AFarmerPlayer::AFarmerPlayer()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
+	ResponseCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("Response Camera"));
+	ResponseCamera->SetupAttachment(GetRootComponent());
+	ResponseCamera->RelativeLocation = FVector(100, 0, 20);
+	ResponseCamera->RelativeRotation = FRotator(0.0f, 180, 0);
+
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
 }
@@ -113,6 +118,11 @@ void AFarmerPlayer::Interact()
 	ACow* ClosestCow = GetClosestCow();
 	if (!ClosestCow)
 		return;
+
+	for (ACow* Cow : CurrentCowsInRange)
+	{
+		Cow->SetMovementEnabled(true);
+	}
 
 	FarmerControllerRef->InteractWithCow(ClosestCow);
 	DisableInput(FarmerControllerRef);
