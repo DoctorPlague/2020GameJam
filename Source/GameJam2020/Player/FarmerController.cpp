@@ -338,7 +338,7 @@ void AFarmerController::SetCurrentCowReaction(EReactionType _ExpectedReaction, f
 {
 	if (CurrentCow)
 	{
-		//CurrentCow->FunctionBoy
+		CurrentCow->PlayReaction(_ExpectedReaction, _fIntensity);
 	}
 }
 
