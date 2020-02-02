@@ -18,8 +18,13 @@ class AFarmerPlayer : public ACharacter
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FollowCamera;
+
 public:
 	AFarmerPlayer();
+
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+		class UCameraComponent* ResponseCamera;
 
 	UFUNCTION(BlueprintPure)
 	class ACow* GetClosestCow();

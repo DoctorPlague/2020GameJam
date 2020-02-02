@@ -4,6 +4,7 @@
 #include "Cow.h"
 
 #include "Player/FarmerPlayer.h"
+#include "Player/FarmerController.h"
 
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/WidgetComponent.h"
@@ -25,8 +26,13 @@ ACow::ACow()
 
 	CowView = CreateDefaultSubobject<UCameraComponent>(TEXT("Cow View"));
 	CowView->SetupAttachment(GetRootComponent());
-	CowView->RelativeLocation = FVector(225, 20, 0.0f);
-	CowView->RelativeRotation = FRotator(0, 0, -140.0f);
+	CowView->RelativeLocation = FVector(225, 0, 0.0f);
+	CowView->RelativeRotation = FRotator(0, -180.0f, 0.0f);
+
+	CowMinigameView = CreateDefaultSubobject<UCameraComponent>(TEXT("Cow Minigame View"));
+	CowMinigameView->SetupAttachment(GetRootComponent());
+	CowMinigameView->RelativeLocation = FVector(225, 20, 0.0f);
+	CowMinigameView->RelativeRotation = FRotator(0, -140.0f, 0.0f);
 }
 
 // Called when the game starts or when spawned
@@ -83,6 +89,29 @@ void ACow::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (!FarmerControllerRef)
+	{
+		if (AFarmerController* FarmerController = Cast<AFarmerController>(GetWorld()->GetFirstLocalPlayerFromController()))
+		{
+			FarmerControllerRef = FarmerController;
+		}
+	}
+
+	APlayerCameraManager* CameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
+	if (CameraManager && HungryWidget)
+	{
+		FRotator NewRotation = HungryWidget->GetComponentRotation();
+		NewRotation.Yaw = CameraManager->GetCameraRotation().Yaw + 180.0f;
+		HungryWidget->SetWorldRotation(NewRotation);
+	}
+
+	if (FarmerControllerRef)
+	{
+		// If interacting, dont decrease hunger
+		if (FarmerControllerRef->bIsInteracting)
+			return;
+	}
+
 	if (CurrentDelay <= 0)
 	{
 		fCowHungerRate += FMath::RandRange(fCowHungerRateChangeMin, fCowHungerRateChangeMax);
@@ -95,13 +124,6 @@ void ACow::Tick(float DeltaTime)
 	fCowFullness -= (fCowHungerRate / fOverallHungerRateSlow) * DeltaTime;
 	fCowFullness = FMath::Max(fCowFullness, 0.0f);
 
-	APlayerCameraManager* CameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
-	if (CameraManager && HungryWidget)
-	{
-		FRotator NewRotation = HungryWidget->GetComponentRotation();
-		NewRotation.Yaw = CameraManager->GetCameraRotation().Yaw + 180.0f;
-		HungryWidget->SetWorldRotation(NewRotation);
-	}
 }
 
 // Called to bind functionality to input

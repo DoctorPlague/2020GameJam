@@ -9,8 +9,17 @@
 UENUM(BlueprintType)		//"BlueprintType" is essential to include
 enum class EReactionType : uint8
 {
-	E_AGRESSIVE 	UMETA(DisplayName = "Agressive"),
-	E_PLEASANT 	UMETA(DisplayName = "Pleasant"),
+	E_ANGRY 	UMETA(DisplayName = "Angry"),
+	E_SAD 	UMETA(DisplayName = "Sad"),
+	E_HAPPY 	UMETA(DisplayName = "Happy"),
+	E_NEUTRAL 	UMETA(DisplayName = "Neutral"),
+};
+UENUM(BlueprintType)		//"BlueprintType" is essential to include
+enum class EExpressionType : uint8
+{
+	E_ANGRY 	UMETA(DisplayName = "Angry"),
+	E_HAPPY 	UMETA(DisplayName = "Happy"),
+	E_SAD 	UMETA(DisplayName = "Sad"),
 };
 
 /**

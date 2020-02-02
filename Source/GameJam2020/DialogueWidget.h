@@ -42,4 +42,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SetupDialogue(FString CowName, FString InputString);
+
+	UFUNCTION(BlueprintPure)
+		bool IsComplete();
 };
