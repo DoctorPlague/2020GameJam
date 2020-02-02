@@ -30,8 +30,8 @@ void UDialogueWidget::NativeOnInitialized()
 	FullDialogue = CowName + ": " + InputString;
 	IsDialogueBoxPopulated = false;
 	DialogueCharIndex = 0;
-	TypingSpeedBase = 0.05f;
-	TypingSpeed = 0.05f;
+	TypingSpeedBase = 0.15f;
+	TypingSpeed = 0.15f;
 	TypingTimer = 0.0f; 
 }
 
