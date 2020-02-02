@@ -18,6 +18,8 @@ void AFarmerController::InteractWithCow(class ACow* _Cow)
 {
 	CurrentCow = _Cow;
 
+	TargetDestination = CurrentCow->GetActorLocation() + CurrentCow->GetActorForwardVector() * FTargetDistanceInFrontofCow;
+
 	//CurrentStage = ECurrentStage::E_INITIALDIALOGUE;
 	ChangeToDialogue("MOOOOCUK");
 
@@ -72,13 +74,13 @@ void AFarmerController::Continue()
 		}
 		break;
 	case ECurrentStage::E_MINIGAME:
-		ChangeToCowView();
+		//ChangeToCowView();
 		break;
 	case ECurrentStage::E_COWREACTION:
 		ChangeToPlayerView();
 		break;
 	case ECurrentStage::E_PLAYERRESPONSE:
-		ChangeToDialogue("Moo Moo mooooo mo!");
+		//ChangeToDialogue("Moo Moo mooooo mo!");
 		break;
 	default:
 		break;
@@ -89,8 +91,8 @@ void AFarmerController::Continue()
 
 void AFarmerController::ChangeViewToConversation()
 {
-	if (!FarmerPlayerRef)
-		return;
+	//if (!FarmerPlayerRef)
+	//	return;
 	if (!ConversationCamera)
 		return;
 	if (!CurrentCow)
@@ -98,7 +100,7 @@ void AFarmerController::ChangeViewToConversation()
 
 	CurrentStage = ECurrentStage::E_INITIALDIALOGUE;
 
-	FVector CowToPlayerDir = (FarmerPlayerRef->GetActorLocation() - CurrentCow->GetActorLocation()).GetSafeNormal();
+	FVector CowToPlayerDir = (TargetDestination - CurrentCow->GetActorLocation()).GetSafeNormal();
 	CowToPlayerDir.Z = 0.0f;
 
 	FVector CowSideVector = CurrentCow->GetActorRightVector();
@@ -116,7 +118,7 @@ void AFarmerController::ChangeViewToConversation()
 
 	ConversationCamera->SetActorLocation(NewLocation);
 
-	float HalfLength = (FarmerPlayerRef->GetActorLocation() - CurrentCow->GetActorLocation()).Size();
+	float HalfLength = (TargetDestination - CurrentCow->GetActorLocation()).Size();
 	HalfLength /= 2.0f;
 	FVector AimLoc = CurrentCow->GetActorLocation() + CowToPlayerDir * HalfLength;
 	ConversationCamera->SetActorRotation(UKismetMathLibrary::FindLookAtRotation(ConversationCamera->GetActorLocation(), AimLoc));
@@ -318,6 +320,18 @@ void AFarmerController::ChangeToPlayerView()
 	FTimerDelegate PlayerResponseDelegate;
 	PlayerResponseDelegate.BindUFunction(this, FName("PlayerResponse"), EReactionType::E_HAPPY);
 	GetWorldTimerManager().SetTimer(ChangeView, PlayerResponseDelegate, fChangeToCowViewTime, false);
+}
+
+void AFarmerController::OnMinigameCompleted(bool _Succeeded)
+{
+	if (!_Succeeded)
+	{
+		FailedInteract();
+		return;
+	}
+
+	ChangeToCowView();
+
 }
 
 void AFarmerController::CompletedReaction(EReactionType _ExpectedReaction, EReactionType _GivenReaction)
