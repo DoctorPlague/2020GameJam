@@ -28,20 +28,31 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 		void BI_OnInteractWithCow(class ACow* _Cow);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION()
 	void ShowDialogue(const FString& _Message);
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION()
 	void SpeechGame(EReactionType _ExpectedReaction);
-	UFUNCTION(BlueprintCallable)
-		void CowExpression(EExpressionType _NewExpression);
-	UFUNCTION(BlueprintCallable)
-		void PlayerResponse(EReactionType _ExpectedReaction);
+	UFUNCTION()
+	void CowExpression(EExpressionType _NewExpression);
+	UFUNCTION()
+	void PlayerResponse(EReactionType _ExpectedReaction);
 
+	UFUNCTION(BlueprintCallable)
+	void ShowCowDialogue(const FString& _Message);
+
+	UFUNCTION(BlueprintCallable)
 	void Continue();
-	void ChangeToDialogue();
+	UFUNCTION(BlueprintCallable)
+	void ChangeToDialogue(const FString& Message = "Moo moo");
+	UFUNCTION(BlueprintCallable)
 	void ChangeToSpeechGame();
+	UFUNCTION(BlueprintCallable)
 	void ChangeToCowView();
+	UFUNCTION(BlueprintCallable)
 	void ChangeToPlayerView();
+
+	UFUNCTION(BlueprintCallable)
+		void CompletedReaction(EReactionType _ExpectedReaction, EReactionType _GivenReaction);
 
 	UFUNCTION(BlueprintImplementableEvent)
 		void BI_OnStartConversationView();
@@ -59,7 +70,7 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 		void BI_OnSpeechGameView();
 	UFUNCTION(BlueprintImplementableEvent)
-		void BI_OnPlayerView();
+		void BI_OnPlayerView(EReactionType _ExpectedReaction);
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void BI_OnAddSuccessfulCow(float _PercentageComplete);
@@ -123,7 +134,9 @@ protected:
 	class ACow* CurrentCow;
 
 	UPROPERTY(BlueprintReadWrite)
-	bool bCowView = false;
+		bool bCowWon = false;
+	UPROPERTY(BlueprintReadWrite)
+		bool bComplete = false;
 
 	UPROPERTY(EditDefaultsOnly)
 		float fInteractReturnToPlayerTime = 0.5f;
