@@ -25,6 +25,8 @@ class GAMEJAM2020_API AFarmerController : public APlayerController
 	
 public:
 	void InteractWithCow(class ACow* _Cow);
+	UFUNCTION(BlueprintImplementableEvent)
+		void BI_OnInteractWithCow(class ACow* _Cow);
 
 	UFUNCTION(BlueprintCallable)
 	void ShowDialogue(const FString& _Message);
@@ -99,6 +101,7 @@ protected:
 	UFUNCTION()
 	void AddSuccessfulCow(class ACow* _Cow);
 public:
+	UPROPERTY(BlueprintReadWrite)
 	class AFarmerPlayer* FarmerPlayerRef;
 
 	UPROPERTY(BlueprintReadWrite)

@@ -32,6 +32,7 @@ void AFarmerController::InteractWithCow(class ACow* _Cow)
 	if (CurrentCow)
 		CurrentCow->SetMovementEnabled(false);
 
+	BI_OnInteractWithCow(CurrentCow);
 }
 
 void AFarmerController::OnPossess(APawn* InPawn)
