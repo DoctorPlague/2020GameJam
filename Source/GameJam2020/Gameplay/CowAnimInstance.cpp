@@ -1,9 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
+#include "CowAnimInstance.h"
+
 #include "Gameplay/Cow.h"
 #include "GameFramework/PawnMovementComponent.h"
 
-#include "CowAnimInstance.h"
 
 void UCowAnimInstance::NativeBeginPlay()
 {

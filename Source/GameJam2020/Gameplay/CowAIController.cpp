@@ -1,8 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
+#include "CowAIController.h"
+
 #include "Gameplay/Cow.h"
 
-#include "CowAIController.h"
 
 ACowAIController::ACowAIController()
 {
