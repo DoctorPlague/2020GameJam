@@ -239,8 +239,12 @@ void AFarmerController::CompleteInteract()
 		CurrentWidget->RemoveFromParent();
 	}
 
-	CurrentCow->SetMovementEnabled(true);
-	CurrentCow = nullptr;
+	if (CurrentCow)
+	{
+		CurrentCow->SetMovementEnabled(true);
+		CurrentCow = nullptr;
+	}
+	
 
 	if (FarmerPlayerRef)
 		FarmerPlayerRef->EnableInput(this);
