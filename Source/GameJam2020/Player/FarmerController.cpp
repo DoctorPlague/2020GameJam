@@ -20,8 +20,7 @@ void AFarmerController::InteractWithCow(class ACow* _Cow)
 
 	TargetDestination = CurrentCow->GetActorLocation() + CurrentCow->GetActorForwardVector() * FTargetDistanceInFrontofCow;
 
-	//CurrentStage = ECurrentStage::E_INITIALDIALOGUE;
-	ChangeToDialogue("MOOOOCUK");
+	CurrentStage = ECurrentStage::E_INITIALDIALOGUE;
 
 	bComplete = false;
 	bIsInteracting = true;
@@ -31,6 +30,8 @@ void AFarmerController::InteractWithCow(class ACow* _Cow)
 	InputMode.SetHideCursorDuringCapture(false);
 	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 	SetInputMode(InputMode);
+
+	ChangeToDialogue("");
 
 	if (CurrentCow)
 		CurrentCow->SetMovementEnabled(false);
@@ -47,10 +48,33 @@ void AFarmerController::OnPossess(APawn* InPawn)
 	}
 }
 
+void AFarmerController::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (CurrentWidget)
+	{
+		if (CurrentWidget->IsComplete() && !bDialogueWasCompleted)
+		{
+			bDialogueWasCompleted = true;
+			BI_OnDialogueComplete();
+		}
+	}
+}
+
 void AFarmerController::Continue()
 {
 	if (!CurrentCow)
 		return;
+
+	if (CurrentWidget)
+	{
+		if (!CurrentWidget->IsComplete())
+		{
+			CurrentWidget->SkipDialogueTyping();
+			return;
+		}
+	}
 
 	switch (CurrentStage)
 	{
@@ -91,8 +115,6 @@ void AFarmerController::Continue()
 
 void AFarmerController::ChangeViewToConversation()
 {
-	//if (!FarmerPlayerRef)
-	//	return;
 	if (!ConversationCamera)
 		return;
 	if (!CurrentCow)
@@ -133,6 +155,7 @@ void AFarmerController::ChangeViewToCurrentCow()
 	if (IsValid(CurrentWidget))
 	{
 		CurrentWidget->RemoveFromParent();
+		CurrentWidget = nullptr;
 	}
 
 	if (CurrentCow)
@@ -153,6 +176,7 @@ void AFarmerController::ChangeViewToCurrentCowSpeechGame()
 	if (CurrentWidget)
 	{
 		CurrentWidget->RemoveFromParent();
+		CurrentWidget = nullptr;
 	}
 
 
@@ -173,6 +197,7 @@ void AFarmerController::ChangeViewToPlayer()
 	if (CurrentWidget)
 	{
 		CurrentWidget->RemoveFromParent();
+		CurrentWidget = nullptr;
 	}
 
 	if (FarmerPlayerRef)
@@ -204,21 +229,24 @@ void AFarmerController::SpeechGame(EReactionType _ExpectedReaction)
 	BI_OnSpeechGameView();
 }
 
-void AFarmerController::CowExpression(EExpressionType _NewExpression)
+void AFarmerController::CowExpression(EReactionType _NewExpression)
 {
 	GetWorldTimerManager().ClearTimer(ChangeView);
 
 	FString Message = "Wow";
 	switch (_NewExpression)
 	{
-	case EExpressionType::E_ANGRY:
+	case EReactionType::E_ANGRY:
 		Message = "MOOOOO!";
 		break;
-	case EExpressionType::E_HAPPY:
+	case EReactionType::E_HAPPY:
 		Message = "Mo Moooo Mo!";
 		break;
-	case EExpressionType::E_SAD:
-		Message = "Mooo...";
+	case EReactionType::E_SAD:
+		Message = "Mooo... mo moo";
+		break;
+	case EReactionType::E_NEUTRAL:
+		Message = "..... Moo";
 		break;
 	default:
 		break;
@@ -240,7 +268,6 @@ void AFarmerController::ShowCowDialogue(const FString& _Message)
 	if (!CurrentWidget && DialogueWidgetClass)
 	{
 		CurrentWidget = CreateWidget<UDialogueWidget>(this, DialogueWidgetClass);
-
 	}
 
 	if (!IsValid(CurrentWidget))
@@ -252,6 +279,7 @@ void AFarmerController::ShowCowDialogue(const FString& _Message)
 		CowName = CurrentCow->CowName;
 	CurrentWidget->AddToViewport();
 	CurrentWidget->SetupDialogue(CowName, _Message);
+	bDialogueWasCompleted = false;
 }
 
 // ########### CHANGE TO ###############
@@ -272,8 +300,10 @@ void AFarmerController::ChangeToDialogue(const FString& Message)
 
 void AFarmerController::ChangeToSpeechGame()
 {
-	if (CurrentWidget)
+	if (!bDialogueWasCompleted)
 	{
+		return;
+
 		if (!CurrentWidget->IsComplete())
 			return;
 	}
@@ -342,11 +372,20 @@ void AFarmerController::SetCurrentCowReaction(EReactionType _ExpectedReaction, f
 	}
 }
 
+void AFarmerController::SetCowExpression(EReactionType _ExpectedReaction)
+{
+	BI_OnSetCowExpression(_ExpectedReaction);
+}
+
 void AFarmerController::CompletedReaction(EReactionType _ExpectedReaction, EReactionType _GivenReaction)
 {
+	bCowWon = false;
 	FString CowResponse = "MOOO!? :(";
 	if (_ExpectedReaction == _GivenReaction)
+	{
 		CowResponse = "Moooo :)";
+		bCowWon = true;
+	}
 	ChangeToDialogue(CowResponse);
 }
 
@@ -379,10 +418,6 @@ void AFarmerController::SetupInputComponent()
 
 	InputComponent->BindAction("Cancel", IE_Pressed, this, &AFarmerController::CancelInteract);
 
-	// TEMP
-	FInputActionBinding& InteractCompleteBind = InputComponent->BindAction("CompleteInteract", IE_Pressed, this, &AFarmerController::SuccededInteract);
-	InteractCompleteBind.bConsumeInput = false;
-	InputComponent->BindAction("FailInteract", IE_Pressed, this, &AFarmerController::FailedInteract);
 }
 
 void AFarmerController::SuccededInteract()
@@ -430,6 +465,7 @@ void AFarmerController::StartCompleteInteract()
 	if (CurrentWidget)
 	{
 		CurrentWidget->RemoveFromParent();
+		CurrentWidget = nullptr;
 	}
 	
 	BI_OnStartInteractComplete();
@@ -447,6 +483,7 @@ void AFarmerController::CompleteInteract()
 	if (CurrentWidget)
 	{
 		CurrentWidget->RemoveFromParent();
+		CurrentWidget = nullptr;
 	}
 
 	if (CurrentCow)
@@ -466,6 +503,8 @@ void AFarmerController::CompleteInteract()
 
 void AFarmerController::AddSuccessfulCow(ACow* _Cow)
 {
+	GetWorldTimerManager().ClearTimer(ChangeView);
+
 	CowsComplete.Add(_Cow);
 	_Cow->CowComplete();
 

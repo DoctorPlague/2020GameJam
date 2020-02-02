@@ -129,7 +129,7 @@ void ACow::Tick(float DeltaTime)
 
 	if (!FarmerControllerRef)
 	{
-		if (AFarmerController* FarmerController = Cast<AFarmerController>(GetWorld()->GetFirstLocalPlayerFromController()))
+		if (AFarmerController* FarmerController = Cast<AFarmerController>(GetWorld()->GetFirstPlayerController()))
 		{
 			FarmerControllerRef = FarmerController;
 		}
@@ -164,13 +164,6 @@ void ACow::Tick(float DeltaTime)
 
 	if (fCowFullness <= 0.0f)
 	{
-		if (!FarmerControllerRef)
-		{
-			if (AFarmerController* FarmerController = Cast<AFarmerController>(GetWorld()->GetFirstLocalPlayerFromController()))
-			{
-				FarmerControllerRef = FarmerController;
-			}
-		}
 		if (FarmerControllerRef)
 			FarmerControllerRef->GameLost(CowName + " Died");
 	}

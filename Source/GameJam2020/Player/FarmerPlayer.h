@@ -82,6 +82,11 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		float fInteractDistance = 150.0f;
 
+	UPROPERTY(EditDefaultsOnly)
+		class UAnimMontage* FeedHayMontage;
+	UPROPERTY(EditDefaultsOnly)
+		class UAnimMontage* InteractMontage;
+
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 		float BaseTurnRate;

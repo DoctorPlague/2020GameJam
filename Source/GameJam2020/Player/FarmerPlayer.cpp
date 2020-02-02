@@ -8,6 +8,8 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Animation/AnimInstance.h"
 
 #include "Gameplay/Cow.h"
 #include "FarmerController.h"
@@ -105,6 +107,11 @@ void AFarmerPlayer::Interact()
 		{
 			if (IInteractInterface::Execute_Interact(InteractHit.Actor.Get(), this))
 			{
+				if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
+				{
+					if (!AnimInstance->IsAnyMontagePlaying() && InteractMontage)
+						AnimInstance->Montage_Play(InteractMontage);
+				}
 				return;
 			}
 		}
@@ -118,6 +125,22 @@ void AFarmerPlayer::Interact()
 	ACow* ClosestCow = GetClosestCow();
 	if (!ClosestCow)
 		return;
+
+	if (CurrentHoldingHay)
+	{
+		if (ClosestCow->Implements<UInteractInterface>())
+		{
+			if (IInteractInterface::Execute_Interact(ClosestCow, this))
+			{
+				if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
+				{
+					if (!AnimInstance->IsAnyMontagePlaying() && InteractMontage)
+						AnimInstance->Montage_Play(InteractMontage);
+				}
+				return;
+			}
+		}
+	}
 
 	for (ACow* Cow : CurrentCowsInRange)
 	{
@@ -171,6 +194,13 @@ void AFarmerPlayer::RemoveHay()
 {
 	if (CurrentHoldingHay)
 		CurrentHoldingHay->Destroy();
+
+	if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
+	{
+		if (FeedHayMontage)
+			AnimInstance->Montage_Play(FeedHayMontage);
+	}
+	
 
 	CurrentHoldingHay = nullptr;
 }
