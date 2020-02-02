@@ -43,6 +43,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SetupDialogue(FString CowName, FString InputString = "");
+	UFUNCTION(BlueprintCallable)
+		void SkipDialogueTyping();
 
 	UFUNCTION(BlueprintPure)
 		bool IsComplete();

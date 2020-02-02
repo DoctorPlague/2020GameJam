@@ -24,6 +24,10 @@ class GAMEJAM2020_API AFarmerController : public APlayerController
 	GENERATED_BODY()
 	
 public:
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+
+
 	void InteractWithCow(class ACow* _Cow);
 	UFUNCTION(BlueprintImplementableEvent)
 		void BI_OnInteractWithCow(class ACow* _Cow);
@@ -55,6 +59,8 @@ public:
 		void OnMinigameCompleted(bool _Succeeded, EReactionType _ExpectedReaction);
 	UFUNCTION(BlueprintCallable)
 		void SetCurrentCowReaction(EReactionType _ExpectedReaction, float _fIntensity);
+	UFUNCTION(BlueprintCallable)
+		void SetCowExpression(EReactionType _ExpectedReaction);
 
 	UFUNCTION(BlueprintCallable)
 		void CompletedReaction(EReactionType _ExpectedReaction, EReactionType _GivenReaction);
@@ -76,6 +82,8 @@ public:
 		void BI_OnSpeechGameView();
 	UFUNCTION(BlueprintImplementableEvent)
 		void BI_OnPlayerView(EReactionType _ExpectedReaction);
+	UFUNCTION(BlueprintImplementableEvent)
+		void BI_OnSetCowExpression(EReactionType _ExpectedReaction);
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void BI_OnAddSuccessfulCow(float _PercentageComplete);
@@ -84,6 +92,8 @@ public:
 		void BI_OnInteractComplete();
 	UFUNCTION(BlueprintImplementableEvent)
 		void BI_OnStartInteractComplete();
+	UFUNCTION(BlueprintImplementableEvent)
+		void BI_OnDialogueComplete();
 
 	UFUNCTION(BlueprintCallable)
 	void ShowEndScreen(FString _Status, FString _Reason);
@@ -143,7 +153,10 @@ public:
 protected:
 	FTimerHandle ChangeView;
 
+	UPROPERTY(BlueprintReadWrite)
 	class ACow* CurrentCow;
+
+	bool bDialogueWasCompleted = true;
 
 	UPROPERTY(BlueprintReadWrite)
 		bool bCowWon = false;

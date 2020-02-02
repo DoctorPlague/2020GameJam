@@ -48,10 +48,33 @@ void AFarmerController::OnPossess(APawn* InPawn)
 	}
 }
 
+void AFarmerController::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (CurrentWidget)
+	{
+		if (CurrentWidget->IsComplete() && !bDialogueWasCompleted)
+		{
+			bDialogueWasCompleted = true;
+			BI_OnDialogueComplete();
+		}
+	}
+}
+
 void AFarmerController::Continue()
 {
 	if (!CurrentCow)
 		return;
+
+	if (CurrentWidget)
+	{
+		if (!CurrentWidget->IsComplete())
+		{
+			CurrentWidget->SkipDialogueTyping();
+			return;
+		}
+	}
 
 	switch (CurrentStage)
 	{
@@ -92,8 +115,6 @@ void AFarmerController::Continue()
 
 void AFarmerController::ChangeViewToConversation()
 {
-	//if (!FarmerPlayerRef)
-	//	return;
 	if (!ConversationCamera)
 		return;
 	if (!CurrentCow)
@@ -247,7 +268,6 @@ void AFarmerController::ShowCowDialogue(const FString& _Message)
 	if (!CurrentWidget && DialogueWidgetClass)
 	{
 		CurrentWidget = CreateWidget<UDialogueWidget>(this, DialogueWidgetClass);
-
 	}
 
 	if (!IsValid(CurrentWidget))
@@ -259,6 +279,7 @@ void AFarmerController::ShowCowDialogue(const FString& _Message)
 		CowName = CurrentCow->CowName;
 	CurrentWidget->AddToViewport();
 	CurrentWidget->SetupDialogue(CowName, _Message);
+	bDialogueWasCompleted = false;
 }
 
 // ########### CHANGE TO ###############
@@ -279,8 +300,10 @@ void AFarmerController::ChangeToDialogue(const FString& Message)
 
 void AFarmerController::ChangeToSpeechGame()
 {
-	if (CurrentWidget)
+	if (!bDialogueWasCompleted)
 	{
+		return;
+
 		if (!CurrentWidget->IsComplete())
 			return;
 	}
@@ -349,8 +372,14 @@ void AFarmerController::SetCurrentCowReaction(EReactionType _ExpectedReaction, f
 	}
 }
 
+void AFarmerController::SetCowExpression(EReactionType _ExpectedReaction)
+{
+	BI_OnSetCowExpression(_ExpectedReaction);
+}
+
 void AFarmerController::CompletedReaction(EReactionType _ExpectedReaction, EReactionType _GivenReaction)
 {
+	bCowWon = false;
 	FString CowResponse = "MOOO!? :(";
 	if (_ExpectedReaction == _GivenReaction)
 	{

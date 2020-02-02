@@ -30,8 +30,8 @@ void UDialogueWidget::NativeOnInitialized()
 	FullDialogue = CowName + ": " + InputString;
 	IsDialogueBoxPopulated = false;
 	DialogueCharIndex = 0;
-	TypingSpeedBase = 0.15f;
-	TypingSpeed = 0.15f;
+	TypingSpeedBase = 0.04f;
+	TypingSpeed = 0.05f;
 	TypingTimer = 0.0f; 
 }
 
@@ -114,6 +114,12 @@ void UDialogueWidget::SetupDialogue(FString _CowName, FString _InputString)
 	if (DialogueBox)
 		DialogueBox->SetText(FText());
 	PopulateDialogueBox();
+}
+
+void UDialogueWidget::SkipDialogueTyping()
+{
+	DialogueBox->SetText(FText::FromString(FullDialogue));
+	IsDialogueBoxPopulated = true;
 }
 
 bool UDialogueWidget::IsComplete()
