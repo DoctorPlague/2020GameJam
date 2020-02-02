@@ -81,7 +81,7 @@ public:
 
 
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
-		float fOverallHungerRateSlow = 20.0f;
+		float fOverallHungerRateSlow = 14.0f;
 
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
 		float fCowHungerRateChangeMin = -5.0f;

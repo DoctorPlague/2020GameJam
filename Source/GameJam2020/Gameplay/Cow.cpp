@@ -34,6 +34,9 @@ ACow::ACow()
 	CowMinigameView->SetupAttachment(GetRootComponent());
 	CowMinigameView->RelativeLocation = FVector(225, 20, 0.0f);
 	CowMinigameView->RelativeRotation = FRotator(0, -140.0f, 0.0f);
+
+	GetCharacterMovement()->MaxWalkSpeed = 150.0f;
+
 }
 
 // Called when the game starts or when spawned
